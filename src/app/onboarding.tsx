@@ -280,6 +280,22 @@ export default function Onboarding() {
               {goal === 'weight_loss' ? (
                 <ChoiceGroup label="Pace" options={PACE} value={pace} onChange={setPace} />
               ) : null}
+              {weightC.value && goalWeightC.value && goal === 'muscle_gain' && goalWeightC.value < weightC.value - 1 ? (
+                <Banner tone="warning" title="Goal weight is below your current weight">
+                  <View style={{ gap: spacing.sm }}>
+                    <AppText variant="label" tone="muted">
+                      "Build muscle" adds a calorie surplus, so it won't help you reach a lower weight. To lose weight while
+                      keeping muscle, choose "Body recomposition" or "Lose weight".
+                    </AppText>
+                    <Button label="Switch to Lose weight" variant="secondary" size="sm" onPress={() => setGoal('weight_loss')} />
+                  </View>
+                </Banner>
+              ) : null}
+              {weightC.value && goalWeightC.value && goal === 'weight_loss' && goalWeightC.value > weightC.value + 1 ? (
+                <Banner tone="warning" title="Goal weight is above your current weight">
+                  "Lose weight" sets a calorie deficit. If you want to gain, choose "Build muscle".
+                </Banner>
+              ) : null}
               {assessment && assessment.level !== 'ok' ? (
                 <Banner tone={assessment.level === 'unsafe' ? 'danger' : 'warning'} title={assessment.level === 'unsafe' ? 'This timeline is too aggressive' : 'This is an ambitious timeline'}>
                   <View style={{ gap: spacing.sm }}>
