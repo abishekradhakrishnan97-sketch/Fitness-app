@@ -27,7 +27,7 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSubtle,
         tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border, borderRightColor: colors.border },
-        tabBarLabelStyle: { fontWeight: '600' },
+        tabBarLabelStyle: { fontWeight: '600', fontSize: 12, lineHeight: 16, paddingBottom: 2 },
         sceneStyle: { backgroundColor: colors.background },
         // Desktop: side rail instead of a bottom bar.
         tabBarPosition: wide ? 'left' : 'bottom',
