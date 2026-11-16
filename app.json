@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Fitness App",
+    "slug": "fitness-app",
+    "version": "0.1.0",
+    "scheme": "fitnessapp",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#0A0C0F",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fitnessapp.app"
+    },
+    "android": {
+      "package": "com.fitnessapp.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0A0C0F",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "single",
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png",
+      "name": "Fitness App",
+      "shortName": "Fitness",
+      "themeColor": "#0A0C0F",
+      "backgroundColor": "#0A0C0F"
+    },
+    "plugins": ["expo-router", "expo-sqlite", "expo-font"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

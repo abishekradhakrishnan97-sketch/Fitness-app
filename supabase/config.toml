@@ -1,0 +1,6 @@
+project_id = "lyeaepzcyxujwcruuddw"
+
+[functions.analyze-food-image]
+# Only signed-in users (user JWT) may call this function. The function also
+# re-checks the user with Supabase Auth before calling Gemini.
+verify_jwt = true
