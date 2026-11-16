@@ -1,6 +1,6 @@
 # Development status
 
-_Last updated: 2026-11-17 — Phase 2 (food logging) implemented on branch `phase-2-food-logging`; awaiting authenticated end-to-end test._
+_Last updated: 2026-11-17 — Phase 2 (food logging) implemented on branch `phase-2-food-logging`; database E2E passed._
 
 ## Architecture (short)
 
@@ -50,7 +50,7 @@ Not yet verified end-to-end: signed-in flows (onboarding → dashboard) and a re
 5. **Security advisor**: `public.has_role()` is a SECURITY DEFINER function callable by signed-in users (only reveals the caller's own roles). Moving it to a `private` schema was declined; revisit before Phase 6 policies use it.
 6. **Vercel env vars missing** (production bundle shows "Setup required"): add `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for Production and Preview, then redeploy.
 
-## Phase 2 — Food logging ✅ (code complete; live E2E pending)
+## Phase 2 — Food logging ✅
 
 Audit finding: food logging "didn't work" because Phase 1 had no add-food UI at all (0 meals in DB); there was no broken save path.
 
@@ -67,7 +67,9 @@ Audit finding: food logging "didn't work" because Phase 1 had no add-food UI at 
 
 Verified: typecheck ✅, 37 unit tests ✅ (drafts/scaling/validation, Open Food Facts parsing, targets, categorisation, AI output normalisation), web build ✅, migration objects verified in DB ✅, Open Food Facts endpoints verified live ✅.
 
-Pending verification: authenticated E2E (save → journal → dashboard → edit → delete → refresh; cross-user isolation) and a live Gemini photo analysis. A rolled-back SQL test as the signed-in user was prepared but declined; can be run on approval, or test manually on the Vercel preview.
+Database E2E ✅ (`supabase/tests/phase2_food_logging_e2e.sql`, run by owner, rolled back): as the real signed-in user — create, daily totals, edit with timestamp preserved, totals trigger, history search, saved meals, cross-user isolation (read/edit/delete blocked), delete cascade, anonymous access blocked.
+
+Still to verify in a browser (needs Vercel env vars): UI flow Add food → save → Journal → Today → edit → delete → refresh; live Gemini photo analysis; barcode camera over HTTPS.
 
 ## Next — Phase 3/4
 
