@@ -47,6 +47,8 @@ function RootNavigator() {
         <Stack.Protected guard={signedIn && onboarded}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="targets" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="log" />
+          <Stack.Screen name="meal/[id]" />
         </Stack.Protected>
         <Stack.Protected guard={!!session && passwordRecovery}>
           <Stack.Screen name="reset-password" />

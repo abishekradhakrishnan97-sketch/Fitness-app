@@ -17,7 +17,9 @@ export interface TodayData {
   timeZone: string;
   targets: NutritionTargetRow | null;
   totals: DayTotals;
-  meals: Pick<MealRow, 'id' | 'meal_type' | 'meal_kind' | 'eaten_at' | 'total_calories_kcal' | 'total_protein_g' | 'source' | 'is_estimate'>[];
+  meals: (Pick<MealRow, 'id' | 'meal_type' | 'meal_kind' | 'eaten_at' | 'total_calories_kcal' | 'total_protein_g' | 'source' | 'is_estimate'> & {
+    meal_items: { name: string; position: number }[];
+  })[];
   latestWeight: WeightLogRow | null;
   previousWeight: WeightLogRow | null;
 }
@@ -45,7 +47,7 @@ export async function getToday(userId: string): Promise<TodayData> {
     getCurrentTargets(userId),
     supabase
       .from('meals')
-      .select('id, meal_type, meal_kind, eaten_at, source, is_estimate, total_calories_kcal, total_protein_g, total_carbohydrates_g, total_fat_g, total_fibre_g')
+      .select('id, meal_type, meal_kind, eaten_at, source, is_estimate, total_calories_kcal, total_protein_g, total_carbohydrates_g, total_fat_g, total_fibre_g, meal_items(name, position)')
       .eq('user_id', userId)
       .eq('local_date', localDate)
       .order('eaten_at', { ascending: true }),
@@ -58,7 +60,7 @@ export async function getToday(userId: string): Promise<TodayData> {
       .limit(2),
   ]);
 
-  const meals = unwrap(mealsRes) ?? [];
+  const meals = (unwrap(mealsRes) ?? []).map((m) => ({ ...m, meal_items: [...m.meal_items].sort((a, b) => a.position - b.position) }));
   const weights = unwrap(weightsRes) ?? [];
   return {
     localDate,

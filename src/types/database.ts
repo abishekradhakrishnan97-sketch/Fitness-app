@@ -3,17 +3,19 @@
 //   npx supabase gen types typescript --project-id lyeaepzcyxujwcruuddw > src/types/database.ts
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
-type Table<Row, Insert, Update = Partial<Insert>> = {
+type Relationship = {
+  foreignKeyName: string;
+  columns: string[];
+  isOneToOne: boolean;
+  referencedRelation: string;
+  referencedColumns: string[];
+};
+
+type Table<Row, Insert, Rel extends Relationship[] = []> = {
   Row: Row;
   Insert: Insert;
-  Update: Update;
-  Relationships: {
-    foreignKeyName: string;
-    columns: string[];
-    isOneToOne: boolean;
-    referencedRelation: string;
-    referencedColumns: string[];
-  }[];
+  Update: Partial<Insert>;
+  Relationships: Rel;
 };
 
 export type AppRole = 'user' | 'client' | 'trainer' | 'admin';
@@ -57,11 +59,42 @@ export type MealItemRow = {
   name: string;
   other_nutrients: Json;
   portion_description: string | null;
-  portion_grams: number;
+  portion_grams: number | null;
   position: number;
   protein_g: number;
+  serving_quantity: number | null;
+  serving_unit: string | null;
+  food_source: string;
+  barcode: string | null;
   user_edited: boolean;
   user_id: string;
+};
+
+export type SavedMealRow = {
+  id: string;
+  user_id: string;
+  name: string;
+  items: Json;
+  use_count: number;
+  last_used_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type MyFoodRow = {
+  name: string;
+  serving_quantity: number | null;
+  serving_unit: string | null;
+  portion_grams: number | null;
+  calories_kcal: number;
+  protein_g: number;
+  carbohydrates_g: number;
+  fat_g: number;
+  fibre_g: number;
+  other_nutrients: Json;
+  barcode: string | null;
+  times_logged: number;
+  last_logged_at: string;
 };
 
 export type NutritionTargetRow = {
@@ -153,7 +186,20 @@ export type Database = {
         { created_at: string; feature: string; id: number; user_id: string },
         { created_at?: string; feature: string; user_id?: string }
       >;
-      meal_items: Table<MealItemRow, Opt<MealItemRow, 'meal_id' | 'name' | 'portion_grams'>>;
+      meal_items: Table<
+        MealItemRow,
+        Opt<MealItemRow, 'meal_id' | 'name'>,
+        [
+          {
+            foreignKeyName: 'meal_items_meal_id_fkey';
+            columns: ['meal_id'];
+            isOneToOne: false;
+            referencedRelation: 'meals';
+            referencedColumns: ['id'];
+          },
+        ]
+      >;
+      saved_meals: Table<SavedMealRow, Opt<SavedMealRow, 'name' | 'items'>>;
       meals: Table<MealRow, Partial<MealRow>>;
       nutrition_targets: Table<
         NutritionTargetRow,
@@ -174,6 +220,8 @@ export type Database = {
     Functions: {
       has_role: { Args: { p_role: AppRole }; Returns: boolean };
       save_meal: { Args: { p_items: Json; p_meal: Json }; Returns: string };
+      update_meal: { Args: { p_meal_id: string; p_meal: Json; p_items: Json }; Returns: undefined };
+      my_foods: { Args: { p_query?: string | null; p_limit?: number }; Returns: MyFoodRow[] };
     };
     Enums: { app_role: AppRole };
     CompositeTypes: { [_ in never]: never };

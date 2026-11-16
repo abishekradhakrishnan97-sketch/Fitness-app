@@ -1,6 +1,9 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { AppText, Button, Card, ChoiceGroup, Screen } from '@/components/ui';
+import { AppText, Banner, Button, Card, ChoiceGroup, Screen } from '@/components/ui';
+import { friendlyError } from '@/services/errors';
+import { getAiPhotoConsent, setAiPhotoConsent } from '@/services/foodAnalysis';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useAsync } from '@/lib/useAsync';
 import { getActiveGoal, getCurrentTargets } from '@/services/profile';
@@ -25,9 +28,29 @@ export default function Profile() {
   const { session, profile, roles, signOut } = useAuth();
   const userId = session!.user.id;
   const { data, reload, refreshing } = useAsync(
-    async () => ({ targets: await getCurrentTargets(userId), goal: await getActiveGoal(userId) }),
+    async () => ({
+      targets: await getCurrentTargets(userId),
+      goal: await getActiveGoal(userId),
+      aiConsent: await getAiPhotoConsent(userId),
+    }),
     [userId],
+    { refetchOnFocus: true },
   );
+  const [consentBusy, setConsentBusy] = useState(false);
+  const [consentError, setConsentError] = useState<string | null>(null);
+
+  const toggleConsent = async (granted: boolean) => {
+    setConsentBusy(true);
+    setConsentError(null);
+    try {
+      await setAiPhotoConsent(userId, granted);
+      await reload();
+    } catch (e) {
+      setConsentError(friendlyError(e));
+    } finally {
+      setConsentBusy(false);
+    }
+  };
 
   return (
     <Screen refreshing={refreshing} onRefresh={reload}>
@@ -74,6 +97,28 @@ export default function Profile() {
           </View>
         </Card>
       ) : null}
+
+      <Card>
+        <View style={styles.head}>
+          <View style={{ flex: 1, gap: 2 }}>
+            <AppText variant="heading">AI photo analysis</AppText>
+            <AppText variant="label" tone="muted">
+              {data?.aiConsent
+                ? 'Allowed. Meal photos you choose to analyse are sent securely to Google Gemini to estimate nutrition.'
+                : 'Not allowed. Photos are never sent to the AI service. You can still log food manually or by barcode.'}
+            </AppText>
+          </View>
+        </View>
+        {consentError ? <Banner tone="danger">{consentError}</Banner> : null}
+        <Button
+          label={data?.aiConsent ? 'Withdraw permission' : 'Allow AI photo analysis'}
+          variant={data?.aiConsent ? 'secondary' : 'primary'}
+          size="sm"
+          loading={consentBusy}
+          onPress={() => toggleConsent(!data?.aiConsent)}
+          style={{ alignSelf: 'flex-start', marginTop: spacing.md }}
+        />
+      </Card>
 
       <Card>
         <ChoiceGroup<ThemePreference> label="Appearance" options={THEMES} value={preference} onChange={setPreference} />

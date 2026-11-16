@@ -81,6 +81,20 @@ Deno.serve(async (req: Request) => {
   if (userError || !userData?.user) return fail(401, "UNAUTHORIZED", "Please sign in to analyse food photos");
   const userId = userData.user.id;
 
+  // --- Explicit consent before any photo is sent to an external AI service ---
+  const { data: prefs, error: prefsError } = await supabase
+    .from("user_preferences")
+    .select("ai_photo_consent_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (prefsError) {
+    console.error("user_preferences read failed:", prefsError.code);
+    return fail(500, "INTERNAL_ERROR", "Something went wrong. Please try again.", true);
+  }
+  if (!prefs?.ai_photo_consent_at) {
+    return fail(403, "CONSENT_REQUIRED", "Please allow AI photo analysis before sending photos.");
+  }
+
   // --- Parse and validate the upload ---
   if (!(req.headers.get("content-type") ?? "").toLowerCase().startsWith("multipart/form-data")) {
     return fail(400, "INVALID_REQUEST", "Send the photo as multipart/form-data in a field named 'image'");

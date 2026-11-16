@@ -1,6 +1,6 @@
 # Development status
 
-_Last updated: 2026-11-17 — end of Phase 1 (foundation)._
+_Last updated: 2026-11-17 — Phase 2 (food logging) implemented on branch `phase-2-food-logging`; awaiting authenticated end-to-end test._
 
 ## Architecture (short)
 
@@ -48,15 +48,30 @@ Not yet verified end-to-end: signed-in flows (onboarding → dashboard) and a re
 3. **Gemini live test**: sign up in the app, then use the food scanner (Phase 2) — or tell me to create a dedicated test user.
 4. **Model choice**: function defaults to `gemini-3.8-flash`; override with Edge Function secret `GEMINI_MODEL` if needed.
 5. **Security advisor**: `public.has_role()` is a SECURITY DEFINER function callable by signed-in users (only reveals the caller's own roles). Moving it to a `private` schema was declined; revisit before Phase 6 policies use it.
-6. **Vercel**: import the GitHub repo, set env vars `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+6. **Vercel env vars missing** (production bundle shows "Setup required"): add `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for Production and Preview, then redeploy.
 
-## Next — Phase 2 (food tracking)
+## Phase 2 — Food logging ✅ (code complete; live E2E pending)
 
-- Consent screen for sending photos to AI (`user_preferences.ai_photo_consent_at`).
-- Private `meal-photos` storage bucket + RLS; camera/upload (web `<input capture>`, native expo-camera/image-picker), client-side resize.
-- Review/edit screen for AI results → `save_meal` with auto category, local date, timezone, meal kind.
-- Manual food entry; meal detail, edit (keep original timestamps), delete, duplicate.
-- Journal: per-day meal list with photos.
+Audit finding: food logging "didn't work" because Phase 1 had no add-food UI at all (0 meals in DB); there was no broken save path.
+
+- **Add food tab**: photo (camera), upload photo, manual entry, packaged food (barcode/search), search of your own food history, frequent & recent foods (one tap), saved meals.
+- **Manual entry**: name, amount + unit (g, ml, piece, katori, cup…), optional grams, calories, protein, carbs, fat, fibre, sugar, sodium; multiple items per meal; auto meal category from local time (overridable); meal kind (regular/treat/cheat/social); notes. Changing amount scales nutrition.
+- **AI photo**: explicit consent screen (stored in `user_preferences.ai_photo_consent_at`, also enforced server-side → `CONSENT_REQUIRED`), camera/gallery, client-side resize + EXIF strip, Gemini via Edge Function, editable review with confidence badges, alternatives, "AI estimate" labels; photo stored only on save in private bucket.
+- **Packaged food**: barcode scan (expo-camera, web + native), manual barcode entry, product search, serving-size picker, label-data notice, not-found → manual fallback. Open Food Facts called directly (public, no key, CORS-enabled).
+- **Meal detail**: view (photo via signed URL), edit (atomic `update_meal`, original timestamps kept), delete (confirm, also removes photo), log again (duplicate), save as reusable meal.
+- **Journal**: Today/7/30/60/90/180/custom ranges, days → meals in category order, per-meal and per-day totals, tap to edit/delete.
+- **Dashboard**: Add food CTA, meals grouped by category with totals, refreshes when you return to it.
+- **Profile**: withdraw/allow AI photo consent.
+- DB (migration `20261117100000_phase2_food_logging.sql`, applied by owner in SQL editor): `meal_items` serving qty/unit/source/barcode; totals trigger; `update_meal()`; `save_meal()` v3 (non-AI meals no longer default to estimate); `saved_meals` (RLS); `my_foods()`; private `meal-photos` bucket with own-folder policies.
+- Edge Function `analyze-food-image` v2: adds server-side consent check.
+
+Verified: typecheck ✅, 37 unit tests ✅ (drafts/scaling/validation, Open Food Facts parsing, targets, categorisation, AI output normalisation), web build ✅, migration objects verified in DB ✅, Open Food Facts endpoints verified live ✅.
+
+Pending verification: authenticated E2E (save → journal → dashboard → edit → delete → refresh; cross-user isolation) and a live Gemini photo analysis. A rolled-back SQL test as the signed-in user was prepared but declined; can be run on approval, or test manually on the Vercel preview.
+
+## Next — Phase 3/4
+
+- Weight history chart, body measurements, private progress photos; water tracking.
 
 Later phases per the master plan: 3 barcode/Open Food Facts, 4 progress/photos/charts, 5 workouts/water/reminders, 6 AI assistant + trainer/client RLS, 7 PWA, deploy, QA.
 
