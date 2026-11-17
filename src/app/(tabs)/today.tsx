@@ -1,13 +1,14 @@
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { LogWeightCard } from '@/components/LogWeightCard';
-import { AppText, Button, Card, EmptyState, ErrorState, Icon, LoadingState, MacroBar, ProgressRing, Screen } from '@/components/ui';
+import { CalorieHero, MacrosCard, QuickActions, WaterCard, WeekCard, WeightCard } from '@/components/dashboard/cards';
+import { AppText, Button, Card, EmptyState, ErrorState, Icon, LoadingState, Screen } from '@/components/ui';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { MEAL_TYPE_LABEL, type MealType } from '@/lib/time/mealCategory';
 import { useAsync } from '@/lib/useAsync';
 import { getToday } from '@/services/dashboard';
 import { useTheme } from '@/theme/ThemeProvider';
-import { radius, spacing } from '@/theme/tokens';
+import { radius, spacing, stroke } from '@/theme/tokens';
+
 const MEAL_ORDER: MealType[] = ['breakfast', 'pre_workout', 'lunch', 'snack', 'dinner', 'other'];
 
 function greeting(): string {
@@ -26,145 +27,136 @@ export default function Today() {
   if (!data) return null;
 
   const { targets, totals, meals } = data;
-  const calTarget = targets?.calories_kcal ?? 0;
-  const remaining = calTarget - totals.calories;
-  const dateLabel = new Date(`${data.localDate}T12:00:00`).toLocaleDateString(undefined, {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  });
+  const dateLabel = new Date(`${data.localDate}T12:00:00`).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' });
 
   return (
     <Screen refreshing={refreshing} onRefresh={reload}>
       <View style={styles.header}>
-        <AppText variant="label" tone="muted">{dateLabel}</AppText>
-        <AppText variant="title" accessibilityRole="header">
-          {greeting()}
-          {profile?.display_name ? `, ${profile.display_name.split(' ')[0]}` : ''}
-        </AppText>
-      </View>
-
-      {/* Hero: calories */}
-      <Card tone="hero">
-        {targets ? (
-          <View style={styles.hero}>
-            <ProgressRing
-              progress={calTarget ? totals.calories / calTarget : 0}
-              size={168}
-              stroke={14}
-              accessibilityLabel={`${Math.round(totals.calories)} of ${calTarget} calories eaten`}
-            >
-              <AppText variant="display" numeric>{Math.abs(Math.round(remaining)).toLocaleString()}</AppText>
-              <AppText variant="caption" tone={remaining < 0 ? 'warning' : 'muted'}>
-                {remaining < 0 ? 'kcal over' : 'kcal left'}
-              </AppText>
-            </ProgressRing>
-            <View style={styles.heroStats}>
-              <Stat label="Target" value={calTarget.toLocaleString()} unit="kcal" />
-              <View style={[styles.divider, { backgroundColor: colors.border }]} />
-              <Stat label="Eaten" value={Math.round(totals.calories).toLocaleString()} unit="kcal" />
-            </View>
+        <View style={{ flex: 1 }}>
+          <AppText variant="overline" tone="muted">{dateLabel}</AppText>
+          <AppText variant="title" accessibilityRole="header">
+            {greeting()}
+            {profile?.display_name ? `, ${profile.display_name.split(' ')[0]}` : ''}
+          </AppText>
+        </View>
+        {data.streak > 0 ? (
+          <View
+            style={[styles.streak, { backgroundColor: colors.carbs, borderColor: colors.ink }]}
+            accessible
+            accessibilityLabel={`${data.streak} day logging streak`}
+          >
+            <Icon name="flame" size={18} color="#0A0A0A" />
+            <AppText variant="statSm" color="#0A0A0A" numeric>{data.streak}</AppText>
+            <AppText variant="caption" color="#0A0A0A">DAY{data.streak === 1 ? '' : 'S'}</AppText>
           </View>
-        ) : (
-          <EmptyState
-            icon="speedometer-outline"
-            title="No targets yet"
-            message="Set your daily targets to start tracking."
-            action={<Button label="Set targets" size="sm" onPress={() => router.push('/targets')} />}
-          />
-        )}
-      </Card>
-
-      <Button label="Add food" icon="add" size="lg" onPress={() => router.push('/add')} fullWidth />
+        ) : null}
+      </View>
 
       {targets ? (
-        <Card>
-          <View style={styles.sectionHead}>
-            <AppText variant="heading">Macros</AppText>
-            <AppText variant="caption" tone="subtle">Today</AppText>
-          </View>
-          <View style={{ gap: spacing.lg }}>
-            <MacroBar label="Protein" consumed={totals.protein} target={targets.protein_g} color={colors.protein} />
-            <MacroBar label="Carbs" consumed={totals.carbohydrates} target={targets.carbohydrates_g} color={colors.carbs} />
-            <MacroBar label="Fat" consumed={totals.fat} target={targets.fat_g} color={colors.fat} />
-            <MacroBar label="Fibre" consumed={totals.fibre} target={targets.fibre_g} color={colors.fibre} />
-          </View>
-        </Card>
-      ) : null}
-
-      <View style={styles.sectionHead}>
-        <AppText variant="heading">Today’s meals</AppText>
-        {meals.length ? <AppText variant="caption" tone="subtle">{meals.length} logged</AppText> : null}
-      </View>
-      {meals.length === 0 ? (
-        <Card tone="inset">
+        <CalorieHero totals={totals} target={targets.calories_kcal} />
+      ) : (
+        <Card tone="hero">
           <EmptyState
-            icon="restaurant-outline"
-            title="Nothing logged yet today"
-            message="Snap a photo of your meal or add it manually — your calories and macros update instantly."
+            icon="speedometer-outline"
+            title="Set your daily targets"
+            message="Your calorie and macro goals power the dashboard."
+            action={<Button label="Set targets" size="sm" onPress={() => router.push('/targets')} />}
           />
         </Card>
-      ) : (
-        MEAL_ORDER.filter((t) => meals.some((m) => (m.meal_type ?? 'other') === t)).map((type) => {
-          const group = meals.filter((m) => (m.meal_type ?? 'other') === type);
-          const kcal = group.reduce((s, m) => s + Number(m.total_calories_kcal), 0);
-          return (
-            <Card key={type} padded={false}>
-              <View style={[styles.groupHead, { borderBottomColor: colors.border }]}>
-                <AppText variant="bodyStrong">{MEAL_TYPE_LABEL[type]}</AppText>
-                <AppText variant="label" tone="muted" numeric>{Math.round(kcal)} kcal</AppText>
-              </View>
-              {group.map((m, i) => (
-                <Pressable
-                  key={m.id}
-                  onPress={() => router.push({ pathname: '/meal/[id]', params: { id: m.id } })}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${MEAL_TYPE_LABEL[type]} at ${new Date(m.eaten_at).toLocaleTimeString()}, ${Math.round(Number(m.total_calories_kcal))} calories. Open details`}
-                  style={({ pressed }) => [styles.mealRow, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border }, pressed && { backgroundColor: colors.surfaceSunken }]}
-                >
-                  <View style={[styles.mealIcon, { backgroundColor: colors.primarySoft }]}>
-                    <Icon name={m.source === 'ai_image' ? 'camera' : 'create'} size={16} color={colors.primary} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <AppText variant="label" numberOfLines={1}>{m.meal_items.map((x) => x.name).join(', ')}</AppText>
-                    <AppText variant="caption" tone="subtle">
-                      {new Date(m.eaten_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
-                      {m.is_estimate ? ' · estimated' : ''}
-                      {m.meal_kind !== 'regular' ? ` · ${m.meal_kind}` : ''}
-                    </AppText>
-                  </View>
-                  <AppText variant="bodyStrong" numeric>{Math.round(Number(m.total_calories_kcal))}</AppText>
-                  <Icon name="chevron-forward" size={16} color={colors.textSubtle} />
-                </Pressable>
-              ))}
-            </Card>
-          );
-        })
       )}
 
-      <LogWeightCard userId={userId} latest={data.latestWeight} previous={data.previousWeight} onSaved={reload} />
+      <QuickActions />
+
+      {targets ? <MacrosCard totals={totals} targets={targets} /> : null}
+
+      <View>
+        <View style={styles.sectionHead}>
+          <AppText variant="heading" accessibilityRole="header">Today&apos;s meals</AppText>
+          <AppText variant="overline" tone="subtle">{meals.length} logged</AppText>
+        </View>
+        {meals.length === 0 ? (
+          <Card tone="inset">
+            <EmptyState
+              icon="restaurant-outline"
+              title="Nothing logged yet"
+              message="Snap a photo, scan a barcode or search — calories and macros update instantly."
+              action={<Button label="Log a meal" icon="add" size="sm" onPress={() => router.push('/add')} />}
+            />
+          </Card>
+        ) : (
+          <View style={{ gap: spacing.md }}>
+            {MEAL_ORDER.filter((t) => meals.some((m) => (m.meal_type ?? 'other') === t)).map((type) => {
+              const group = meals.filter((m) => (m.meal_type ?? 'other') === type);
+              const kcal = group.reduce((s, m) => s + Number(m.total_calories_kcal), 0);
+              return (
+                <Card key={type} padded={false}>
+                  <View style={[styles.groupHead, { borderBottomColor: colors.ink, backgroundColor: colors.surfaceSunken }]}>
+                    <AppText variant="overline">{MEAL_TYPE_LABEL[type]}</AppText>
+                    <AppText variant="overline" numeric>{Math.round(kcal)} kcal</AppText>
+                  </View>
+                  {group.map((m, i) => (
+                    <Pressable
+                      key={m.id}
+                      onPress={() => router.push({ pathname: '/meal/[id]', params: { id: m.id } })}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${MEAL_TYPE_LABEL[type]}: ${m.meal_items.map((x) => x.name).join(', ')}, ${Math.round(Number(m.total_calories_kcal))} calories. Open details`}
+                      style={({ pressed }) => [
+                        styles.mealRow,
+                        i > 0 && { borderTopWidth: stroke.hairline, borderTopColor: colors.border },
+                        pressed && { backgroundColor: colors.primarySoft },
+                      ]}
+                    >
+                      <View style={[styles.mealIcon, { backgroundColor: colors.primary, borderColor: colors.ink }]}>
+                        <Icon name={m.source === 'ai_image' ? 'camera' : 'create'} size={16} color={colors.onPrimary} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <AppText variant="bodyStrong" numberOfLines={1}>{m.meal_items.map((x) => x.name).join(', ')}</AppText>
+                        <AppText variant="caption" tone="subtle">
+                          {new Date(m.eaten_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                          {m.is_estimate ? ' · AI estimate' : ''}
+                          {m.meal_kind !== 'regular' ? ` · ${m.meal_kind}` : ''}
+                        </AppText>
+                      </View>
+                      <AppText variant="statSm" numeric>{Math.round(Number(m.total_calories_kcal))}</AppText>
+                      <Icon name="chevron-forward" size={16} color={colors.textMuted} />
+                    </Pressable>
+                  ))}
+                </Card>
+              );
+            })}
+          </View>
+        )}
+      </View>
+
+      <WaterCard userId={userId} water={data.water} targetMl={targets?.water_ml ?? 2500} onChange={reload} />
+      <WeekCard data={data} />
+      <WeightCard userId={userId} data={data} onChange={reload} />
     </Screen>
   );
 }
 
-function Stat({ label, value, unit }: { label: string; value: string; unit: string }) {
-  return (
-    <View style={{ alignItems: 'center', gap: 2, flex: 1 }}>
-      <AppText variant="overline" tone="subtle">{label}</AppText>
-      <AppText variant="heading" numeric>
-        {value} <AppText variant="caption" tone="muted">{unit}</AppText>
-      </AppText>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  header: { gap: 2, marginTop: spacing.sm },
-  hero: { alignItems: 'center', gap: spacing.xl },
-  heroStats: { flexDirection: 'row', alignItems: 'center', alignSelf: 'stretch' },
-  divider: { width: 1, height: 32 },
+  header: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.md, marginTop: spacing.sm },
+  streak: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderWidth: stroke.base,
+    borderRadius: radius.md,
+    transform: [{ rotate: '-3deg' }],
+  },
   sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: spacing.md },
-  groupHead: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingVertical: spacing.md, borderBottomWidth: StyleSheet.hairlineWidth },
+  groupHead: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: stroke.base,
+    borderTopLeftRadius: radius.lg - 2,
+    borderTopRightRadius: radius.lg - 2,
+  },
   mealRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.lg },
-  mealIcon: { width: 36, height: 36, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
+  mealIcon: { width: 34, height: 34, borderRadius: radius.sm, borderWidth: stroke.base, alignItems: 'center', justifyContent: 'center' },
 });

@@ -81,6 +81,15 @@ Still to verify in a browser (needs Vercel env vars): UI flow Add food → save 
 - Speed: Add food CTA directly under the calorie ring; food name auto-focuses on manual entry; meal-type, unit and journal-range chips are single swipeable rows instead of 2–3 wrapped lines.
 - Code health: ESLint (eslint-config-expo) set up and clean; `useAsync` rewritten so loading is derived and stale responses can't overwrite newer data.
 
+## Neo-brutalist redesign + dashboard + fixes (2026-11-18) ✅
+
+- **AI photo fix**: Gemini returned 503 UNAVAILABLE for `gemini-3.8-flash` on every request. Edge Function v3 now tries a model chain (`GEMINI_MODEL` → `gemini-3.6-flash` → `gemini-3.5-flash-lite` → `gemini-2.5-flash`, override with `GEMINI_FALLBACK_MODELS`), 25 s per model inside a 100 s budget; logs which model answered.
+- **Design system**: neo-brutalism — paper/ink palette (light default, dark supported), 2px ink outlines, hard offset shadows, press-in buttons, Space Grotesk + Space Mono (expo-google-fonts). `primary` (lime fill) split from `primaryText` (readable text). All text ≥ 4.5:1, outlines ≥ 15:1.
+- **Dashboard**: calories-left hero with 20-block bar, one-tap Photo/Barcode/Search/Manual, macro calorie split + bars, water tracker (+250/500/750, undo), 7-day calorie chart vs goal with avg/on-target/avg-protein, 90-day weight trend vs goal weight with inline logging, logging streak. All from real data; charts have text alternatives.
+- **Water**: `water_logs` table (migration `20261117182649_water_logs.sql`, applied; owner-only RLS).
+- **Profile**: edit profile & goal after onboarding (prefilled, recalculates targets); warning when goal type contradicts goal weight.
+- Tests: 41 unit tests (new: streak, week fill, on-target, weight change).
+
 ## Next — Phase 3/4
 
 - Weight history chart, body measurements, private progress photos; water tracking.

@@ -9,7 +9,7 @@ import { draftFromRow, type ItemPayload } from '@/lib/nutrition/mealDraft';
 import { friendlyError } from '@/services/errors';
 import { deleteSavedMeal, listSavedMeals, markSavedMealUsed, searchMyFoods } from '@/services/meals';
 import { useTheme } from '@/theme/ThemeProvider';
-import { radius, spacing } from '@/theme/tokens';
+import { hardShadow, radius, spacing, stroke } from '@/theme/tokens';
 import type { MyFoodRow, SavedMealRow } from '@/types/database';
 
 
@@ -23,15 +23,12 @@ function ActionTile({ icon, label, hint, onPress, primary }: { icon: IconName; l
       accessibilityHint={hint}
       style={({ pressed }) => [
         styles.tile,
-        {
-          backgroundColor: primary ? colors.primary : colors.surface,
-          borderColor: primary ? colors.primary : colors.border,
-          opacity: pressed ? 0.85 : 1,
-        },
+        { backgroundColor: primary ? colors.primary : colors.surface, borderColor: colors.ink, borderWidth: stroke.base },
+        pressed ? { transform: [{ translateX: 3 }, { translateY: 3 }] } : hardShadow(colors.shadow, 4),
       ]}
     >
-      <Icon name={icon} size={24} color={primary ? colors.onPrimary : colors.primary} />
-      <AppText variant="bodyStrong" color={primary ? colors.onPrimary : colors.text}>{label}</AppText>
+      <Icon name={icon} size={26} color={primary ? colors.onPrimary : colors.text} />
+      <AppText variant="heading" color={primary ? colors.onPrimary : colors.text}>{label}</AppText>
       <AppText variant="caption" color={primary ? colors.onPrimary : colors.textMuted}>{hint}</AppText>
     </Pressable>
   );
@@ -133,7 +130,7 @@ export default function AddFood() {
                   </AppText>
                 </View>
                 <AppText variant="bodyStrong" numeric>{Math.round(Number(f.calories_kcal))} kcal</AppText>
-                <Icon name="add-circle" size={22} color={colors.primary} />
+                <Icon name="add-circle" size={24} color={colors.primaryText} />
               </Pressable>
             ))}
           </Card>
@@ -159,7 +156,7 @@ export default function AddFood() {
                     <Icon name="trash-outline" size={18} color={colors.textSubtle} />
                   </Pressable>
                   <Pressable onPress={() => pickSaved(m)} hitSlop={11} accessibilityRole="button" accessibilityLabel={`Log ${m.name}`}>
-                    <Icon name="add-circle" size={22} color={colors.primary} />
+                    <Icon name="add-circle" size={24} color={colors.primaryText} />
                   </Pressable>
                 </View>
               );
@@ -173,6 +170,6 @@ export default function AddFood() {
 
 const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
-  tile: { flexGrow: 1, flexBasis: '45%', minHeight: 112, padding: spacing.lg, borderRadius: radius.lg, borderWidth: 1, gap: spacing.xs, justifyContent: 'flex-end' },
+  tile: { flexGrow: 1, flexBasis: '45%', minHeight: 116, padding: spacing.lg, borderRadius: radius.lg, gap: spacing.xs, justifyContent: 'flex-end' },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.lg },
 });

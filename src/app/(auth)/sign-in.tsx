@@ -54,14 +54,14 @@ export default function SignIn() {
         returnKeyType="go"
       />
       <View style={{ alignItems: 'flex-end', marginTop: -spacing.sm }}>
-        <Link href="/forgot-password" style={{ color: colors.primary, paddingVertical: spacing.md, paddingLeft: spacing.md, minHeight: 44 }}>
+        <Link href="/forgot-password" style={{ color: colors.primaryText, textDecorationLine: 'underline', paddingVertical: spacing.md, paddingLeft: spacing.md, minHeight: 44 }}>
           Forgot password?
         </Link>
       </View>
       <Button label="Sign in" size="lg" onPress={submit} loading={busy} fullWidth />
       <AppText tone="muted" align="center">
         New here?{' '}
-        <Link href="/sign-up" style={{ color: colors.primary, fontWeight: '600' }}>
+        <Link href="/sign-up" style={{ color: colors.primaryText, textDecorationLine: 'underline', fontWeight: '600' }}>
           Create an account
         </Link>
       </AppText>

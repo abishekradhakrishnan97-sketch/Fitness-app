@@ -62,7 +62,24 @@ export default function Profile() {
         <AppText variant="caption" tone="subtle" style={{ marginTop: spacing.xs }}>
           {roles.includes('trainer') ? 'Trainer' : roles.includes('client') ? 'Coached client' : 'Personal account'}
         </AppText>
+        <Button label="Edit profile & goal" icon="create-outline" variant="secondary" size="sm" onPress={() => router.push('/setup')} style={{ alignSelf: 'flex-start', marginTop: spacing.md }} />
       </Card>
+      {data?.goal &&
+      data.goal.start_weight_kg &&
+      data.goal.target_weight_kg &&
+      ((data.goal.goal_type === 'muscle_gain' && Number(data.goal.target_weight_kg) < Number(data.goal.start_weight_kg) - 1) ||
+        (data.goal.goal_type === 'weight_loss' && Number(data.goal.target_weight_kg) > Number(data.goal.start_weight_kg) + 1)) ? (
+        <Banner tone="warning" title="Your goal and goal weight don’t match">
+          <View style={{ gap: spacing.sm }}>
+            <AppText variant="label" tone="muted">
+              {data.goal.goal_type === 'muscle_gain'
+                ? '“Build muscle” sets a calorie surplus, but your goal weight is lower than your starting weight. Your calorie target is probably too high.'
+                : '“Lose weight” sets a calorie deficit, but your goal weight is higher than your starting weight.'}
+            </AppText>
+            <Button label="Fix goal" size="sm" onPress={() => router.push('/setup')} style={{ alignSelf: 'flex-start' }} />
+          </View>
+        </Banner>
+      ) : null}
 
       <Card>
         <View style={styles.head}>
@@ -88,7 +105,10 @@ export default function Profile() {
 
       {data?.goal ? (
         <Card>
-          <AppText variant="heading">Goal</AppText>
+          <View style={styles.head}>
+            <AppText variant="heading">Goal</AppText>
+            <Button label="Edit" size="sm" variant="secondary" onPress={() => router.push('/setup')} />
+          </View>
           <View style={styles.grid}>
             <Row label="Goal" value={GOAL_LABEL[data.goal.goal_type] ?? data.goal.goal_type} />
             {data.goal.start_weight_kg ? <Row label="Starting weight" value={`${data.goal.start_weight_kg} kg`} /> : null}

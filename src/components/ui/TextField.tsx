@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
-import { radius, spacing, typography } from '@/theme/tokens';
+import { fonts, hardShadow, radius, spacing, stroke, typography } from '@/theme/tokens';
 import { AppText } from './AppText';
 
 export interface TextFieldProps extends TextInputProps {
@@ -14,19 +14,25 @@ export interface TextFieldProps extends TextInputProps {
 export function TextField({ label, error, hint, suffix, style, onFocus, onBlur, ...rest }: TextFieldProps) {
   const { colors } = useTheme();
   const [focused, setFocused] = useState(false);
-  const borderColor = error ? colors.danger : focused ? colors.primary : colors.inputBorder;
+  const borderColor = error ? colors.danger : colors.inputBorder;
 
   return (
     <View style={styles.wrap}>
-      <AppText variant="label" tone="muted" nativeID={`${label}-label`}>
+      <AppText variant="overline" tone="muted" nativeID={`${label}-label`}>
         {label}
       </AppText>
-      <View style={[styles.box, { borderColor, backgroundColor: colors.surfaceSunken }]}>
+      <View
+        style={[
+          styles.box,
+          { borderColor, backgroundColor: colors.surface, borderWidth: focused || error ? stroke.heavy : stroke.base },
+          focused && hardShadow(error ? colors.danger : colors.primary, 3),
+        ]}
+      >
         <TextInput
           accessibilityLabel={label}
           accessibilityLabelledBy={`${label}-label`}
           placeholderTextColor={colors.textSubtle}
-          selectionColor={colors.primary}
+          selectionColor={colors.primaryText}
           onFocus={(e) => {
             setFocused(true);
             onFocus?.(e);
@@ -39,14 +45,14 @@ export function TextField({ label, error, hint, suffix, style, onFocus, onBlur, 
           {...rest}
         />
         {suffix ? (
-          <AppText variant="label" tone="subtle">
-            {suffix}
+          <AppText variant="caption" tone="muted" style={{ fontFamily: fonts.monoBold }}>
+            {suffix.toUpperCase()}
           </AppText>
         ) : null}
       </View>
       {error ? (
-        <AppText variant="caption" tone="danger" accessibilityLiveRegion="polite">
-          {error}
+        <AppText variant="caption" tone="danger" accessibilityLiveRegion="polite" style={{ fontFamily: fonts.monoBold }}>
+          ✕ {error}
         </AppText>
       ) : hint ? (
         <AppText variant="caption" tone="subtle">
@@ -62,9 +68,8 @@ const styles = StyleSheet.create({
   box: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
     borderRadius: radius.md,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md + 2,
     minHeight: 50,
     gap: spacing.sm,
   },

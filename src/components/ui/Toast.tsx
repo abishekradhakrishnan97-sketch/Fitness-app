@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import { Animated, AccessibilityInfo, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme/ThemeProvider';
-import { radius, spacing } from '@/theme/tokens';
+import { hardShadow, radius, spacing, stroke } from '@/theme/tokens';
 import { AppText } from './AppText';
 import { Icon } from './Icon';
 
@@ -46,10 +46,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <Animated.View
             accessibilityLiveRegion="polite"
             accessibilityRole="alert"
-            style={[styles.toast, { opacity, backgroundColor: colors.text, borderColor: colors.border }]}
+            style={[styles.toast, { opacity, backgroundColor: colors.primary, borderColor: colors.ink }, hardShadow(colors.ink, 3)]}
           >
-            <Icon name={toast.tone === 'success' ? 'checkmark-circle' : 'alert-circle'} size={20} color={toast.tone === 'success' ? colors.accent : colors.danger} />
-            <AppText variant="label" color={colors.background}>{toast.message}</AppText>
+            <Icon name={toast.tone === 'success' ? 'checkmark-circle' : 'alert-circle'} size={20} color={toast.tone === 'success' ? colors.onPrimary : colors.danger} />
+            <AppText variant="label" color={colors.onPrimary} style={{ fontFamily: 'SpaceGrotesk_600SemiBold' }}>{toast.message}</AppText>
           </Animated.View>
         </View>
       ) : null}
@@ -67,8 +67,8 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    borderRadius: radius.pill,
-    borderWidth: 1,
+    borderRadius: radius.md,
+    borderWidth: stroke.base,
     maxWidth: 480,
   },
 });

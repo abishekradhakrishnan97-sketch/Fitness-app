@@ -75,7 +75,7 @@ export default function SignUp() {
       <Button label="Create account" size="lg" onPress={submit} loading={busy} fullWidth />
       <AppText tone="muted" align="center">
         Already have an account?{' '}
-        <Link href="/sign-in" style={{ color: colors.primary, fontWeight: '600' }}>
+        <Link href="/sign-in" style={{ color: colors.primaryText, textDecorationLine: 'underline', fontWeight: '600' }}>
           Sign in
         </Link>
       </AppText>

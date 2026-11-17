@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import { useWindowDimensions } from 'react-native';
 import { Icon, type IconName } from '@/components/ui';
 import { useTheme } from '@/theme/ThemeProvider';
-import { layout } from '@/theme/tokens';
+import { fonts, layout, stroke } from '@/theme/tokens';
 
 
 function icon(active: IconName, inactive: IconName) {
@@ -23,10 +23,18 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSubtle,
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border, borderRightColor: colors.border },
-        tabBarLabelStyle: { fontWeight: '600', fontSize: 12, lineHeight: 16, paddingBottom: 2 },
+        tabBarActiveTintColor: colors.onPrimary,
+        tabBarInactiveTintColor: colors.textMuted,
+        tabBarActiveBackgroundColor: colors.primary,
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.ink,
+          borderTopWidth: stroke.base,
+          borderRightColor: colors.ink,
+          borderRightWidth: wide ? stroke.base : 0,
+        },
+        tabBarItemStyle: { borderRadius: 0 },
+        tabBarLabelStyle: { fontFamily: fonts.monoBold, fontSize: 11, lineHeight: 16, letterSpacing: 0.4, textTransform: 'uppercase', paddingBottom: 2 },
         sceneStyle: { backgroundColor: colors.background },
         // Desktop: side rail instead of a bottom bar.
         tabBarPosition: wide ? 'left' : 'bottom',

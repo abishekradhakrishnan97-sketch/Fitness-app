@@ -15,11 +15,11 @@ export interface ProgressRingProps {
 
 export function ProgressRing({ progress, size = 180, stroke = 14, color, children, accessibilityLabel }: ProgressRingProps) {
   const { colors } = useTheme();
-  const r = (size - stroke) / 2;
+  const r = (size - stroke) / 2 - 2;
   const c = 2 * Math.PI * r;
   const p = Number.isFinite(progress) ? Math.max(0, progress) : 0;
   const over = p > 1;
-  const ringColor = over ? colors.warning : (color ?? colors.accent);
+  const ringColor = over ? colors.carbs : (color ?? colors.accent);
 
   return (
     <View
@@ -37,12 +37,14 @@ export function ProgressRing({ progress, size = 180, stroke = 14, color, childre
           r={r}
           stroke={ringColor}
           strokeWidth={stroke}
-          strokeLinecap="round"
+          strokeLinecap="butt"
           fill="none"
           strokeDasharray={`${c} ${c}`}
           strokeDashoffset={c * (1 - Math.min(p, 1))}
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
+        <Circle cx={size / 2} cy={size / 2} r={r + stroke / 2} stroke={colors.ink} strokeWidth={2} fill="none" />
+        <Circle cx={size / 2} cy={size / 2} r={r - stroke / 2} stroke={colors.ink} strokeWidth={2} fill="none" />
       </Svg>
       <View style={[StyleSheet.absoluteFill, styles.center]}>{children}</View>
     </View>

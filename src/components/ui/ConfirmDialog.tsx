@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState, type ReactNode } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
-import { radius, spacing } from '@/theme/tokens';
+import { hardShadow, radius, spacing, stroke } from '@/theme/tokens';
 import { AppText } from './AppText';
 import { Button } from './Button';
 
@@ -38,7 +38,7 @@ export function useConfirm(): [ReactNode, (o: ConfirmOptions) => Promise<boolean
     <Modal visible={!!opts} transparent animationType="fade" onRequestClose={() => close(false)}>
       <Pressable style={[styles.overlay, { backgroundColor: colors.overlay }]} onPress={() => close(false)} accessibilityLabel="Dismiss">
         <Pressable
-          style={[styles.sheet, { backgroundColor: colors.surfaceRaised, borderColor: colors.border }]}
+          style={[styles.sheet, { backgroundColor: colors.surface, borderColor: colors.ink }, hardShadow(colors.shadow, 6)]}
           accessibilityRole="alert"
           onPress={() => undefined}
         >
@@ -63,6 +63,6 @@ export function useConfirm(): [ReactNode, (o: ConfirmOptions) => Promise<boolean
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
-  sheet: { width: '100%', maxWidth: 400, borderRadius: radius.xl, borderWidth: 1, padding: spacing.xxl, gap: spacing.md },
+  sheet: { width: '100%', maxWidth: 400, borderRadius: radius.lg, borderWidth: stroke.base, padding: spacing.xxl, gap: spacing.md },
   actions: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.md },
 });

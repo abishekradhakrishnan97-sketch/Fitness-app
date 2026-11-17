@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
-import { radius, spacing } from '@/theme/tokens';
+import { radius, spacing, stroke } from '@/theme/tokens';
 import { AppText } from './AppText';
 
 export function MacroBar({
@@ -19,6 +19,7 @@ export function MacroBar({
   const { colors } = useTheme();
   const ratio = target > 0 ? consumed / target : 0;
   const pct = Math.min(1, Math.max(0, ratio));
+  const over = ratio > 1.05;
   const remaining = Math.max(0, target - consumed);
 
   return (
@@ -26,26 +27,23 @@ export function MacroBar({
       style={styles.wrap}
       accessible
       accessibilityRole="progressbar"
-      accessibilityLabel={`${label}: ${Math.round(consumed)} of ${target} ${unit}`}
+      accessibilityLabel={`${label}: ${Math.round(consumed)} of ${target} ${unit}${over ? ', over target' : ''}`}
       accessibilityValue={{ min: 0, max: 100, now: Math.round(pct * 100) }}
     >
       <View style={styles.top}>
-        <View style={styles.labelRow}>
-          <View style={[styles.dot, { backgroundColor: color }]} />
-          <AppText variant="label">{label}</AppText>
-        </View>
-        <AppText variant="label" tone="muted" numeric>
-          <AppText variant="label" numeric>
+        <AppText variant="overline">{label}</AppText>
+        <AppText variant="caption" tone="muted" numeric>
+          <AppText variant="statSm" numeric style={{ fontSize: 15 }}>
             {Math.round(consumed)}
           </AppText>
-          {` / ${target} ${unit}`}
+          {` / ${target}${unit}`}
         </AppText>
       </View>
-      <View style={[styles.track, { backgroundColor: colors.ringTrack }]}>
-        <View style={[styles.fill, { width: `${pct * 100}%`, backgroundColor: ratio > 1.05 ? colors.warning : color }]} />
+      <View style={[styles.track, { backgroundColor: colors.surfaceSunken, borderColor: colors.ink }]}>
+        <View style={[styles.fill, { width: `${pct * 100}%`, backgroundColor: over ? colors.carbs : color, borderColor: colors.ink, borderRightWidth: pct > 0 && pct < 1 ? stroke.base : 0 }]} />
       </View>
-      <AppText variant="caption" tone="subtle" numeric>
-        {ratio > 1.05 ? `${Math.round(consumed - target)} ${unit} over` : `${Math.round(remaining)} ${unit} left`}
+      <AppText variant="caption" tone={over ? 'warning' : 'subtle'} numeric>
+        {over ? `+${Math.round(consumed - target)}${unit} OVER` : `${Math.round(remaining)}${unit} LEFT`}
       </AppText>
     </View>
   );
@@ -53,9 +51,7 @@ export function MacroBar({
 
 const styles = StyleSheet.create({
   wrap: { gap: spacing.xs + 2 },
-  top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  labelRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  dot: { width: 8, height: 8, borderRadius: 4 },
-  track: { height: 8, borderRadius: radius.pill, overflow: 'hidden' },
-  fill: { height: '100%', borderRadius: radius.pill },
+  top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
+  track: { height: 16, borderRadius: radius.sm, overflow: 'hidden', borderWidth: stroke.base },
+  fill: { height: '100%' },
 });

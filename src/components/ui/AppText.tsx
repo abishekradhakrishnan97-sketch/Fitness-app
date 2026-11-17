@@ -11,6 +11,7 @@ export interface AppTextProps extends TextProps {
   align?: TextStyle['textAlign'];
   /** Tabular numerals so changing numbers don't jitter. */
   numeric?: boolean;
+  uppercase?: boolean;
 }
 
 const toneColor = (c: Palette, tone: Tone): string =>
@@ -18,14 +19,14 @@ const toneColor = (c: Palette, tone: Tone): string =>
     default: c.text,
     muted: c.textMuted,
     subtle: c.textSubtle,
-    primary: c.primary,
+    primary: c.primaryText,
     danger: c.danger,
     warning: c.warning,
     success: c.success,
     onPrimary: c.onPrimary,
   })[tone];
 
-export function AppText({ variant = 'body', tone = 'default', color, align, numeric, style, ...rest }: AppTextProps) {
+export function AppText({ variant = 'body', tone = 'default', color, align, numeric, uppercase, style, ...rest }: AppTextProps) {
   const { colors } = useTheme();
   return (
     <Text
@@ -33,7 +34,7 @@ export function AppText({ variant = 'body', tone = 'default', color, align, nume
       style={[
         typography[variant],
         { color: color ?? toneColor(colors, tone), textAlign: align },
-        variant === 'overline' && { textTransform: 'uppercase' },
+        (variant === 'overline' || uppercase) && { textTransform: 'uppercase' },
         numeric && { fontVariant: ['tabular-nums'] },
         style,
       ]}

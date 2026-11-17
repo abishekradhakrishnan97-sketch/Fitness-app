@@ -17,7 +17,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function readStored(): ThemePreference {
   const v = kvGet(STORAGE_KEY);
-  return v === 'light' || v === 'dark' || v === 'system' ? v : 'dark';
+  return v === 'light' || v === 'dark' || v === 'system' ? v : 'light';
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

@@ -12,7 +12,8 @@
 //
 // Secrets (Edge Function secrets, never sent to clients):
 //   GEMINI_API_KEY             required
-//   GEMINI_MODEL               optional, default below
+//   GEMINI_MODEL               optional, preferred model (default below)
+//   GEMINI_FALLBACK_MODELS     optional, comma-separated models tried when the preferred one is unavailable
 //   FOOD_SCAN_HOURLY_LIMIT     optional, default 30 analyses per user per hour
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
@@ -21,6 +22,8 @@ import { analyseFoodWithGemini, GeminiError } from "./gemini.ts";
 import { detectImageType, InvalidModelOutputError, normaliseAnalysis, SUPPORTED_IMAGE_TYPES } from "./nutrition.ts";
 
 const DEFAULT_MODEL = "gemini-3.8-flash";
+const DEFAULT_FALLBACKS = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash"];
+const MODEL_RE = /^[a-z0-9][a-z0-9.\-]{2,80}$/i;
 const MAX_IMAGE_BYTES = 7 * 1024 * 1024;
 const FEATURE = "food_image_analysis";
 
@@ -61,9 +64,12 @@ Deno.serve(async (req: Request) => {
     console.error("GEMINI_API_KEY secret is not set");
     return fail(500, "AI_CONFIG_ERROR", "Food analysis is not configured yet");
   }
-  const model = Deno.env.get("GEMINI_MODEL")?.trim() || DEFAULT_MODEL;
-  if (!/^[a-z0-9][a-z0-9.\-]{2,80}$/i.test(model)) {
-    console.error("GEMINI_MODEL secret has an invalid format");
+  const preferred = Deno.env.get("GEMINI_MODEL")?.trim() || DEFAULT_MODEL;
+  const fallbackEnv = Deno.env.get("GEMINI_FALLBACK_MODELS");
+  const fallbacks = fallbackEnv ? fallbackEnv.split(",").map((m) => m.trim()).filter(Boolean) : DEFAULT_FALLBACKS;
+  const models = [...new Set([preferred, ...fallbacks])].filter((m) => MODEL_RE.test(m)).slice(0, 5);
+  if (!models.length) {
+    console.error("GEMINI_MODEL / GEMINI_FALLBACK_MODELS have an invalid format");
     return fail(500, "AI_CONFIG_ERROR", "Food analysis is not configured correctly");
   }
   const hourlyLimit = Number(Deno.env.get("FOOD_SCAN_HOURLY_LIMIT") ?? 30) || 30;
@@ -150,11 +156,12 @@ Deno.serve(async (req: Request) => {
   // --- Analyse ---
   const started = Date.now();
   try {
-    const result = await analyseFoodWithGemini({ apiKey, model, image: bytes, mimeType, hint });
+    const result = await analyseFoodWithGemini({ apiKey, models, image: bytes, mimeType, hint });
     const analysis = normaliseAnalysis(result.json);
     console.log(JSON.stringify({
       event: "food_analysis_ok",
       model: result.model,
+      attempts: result.attempts,
       ms: Date.now() - started,
       items: analysis.items.length,
       needs_review: analysis.needs_review,

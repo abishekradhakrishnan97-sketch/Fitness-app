@@ -1,7 +1,7 @@
 import type React from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
-import { radius, spacing } from '@/theme/tokens';
+import { fonts, hardShadow, radius, spacing, stroke } from '@/theme/tokens';
 import { AppText } from './AppText';
 
 export interface Choice<T extends string> {
@@ -44,7 +44,7 @@ export function ChoiceGroup<T extends string>(props: SingleProps<T> | MultiProps
   return (
     <View style={styles.wrap} accessibilityRole={props.multiple ? undefined : 'radiogroup'} accessibilityLabel={label}>
       {label ? (
-        <AppText variant="label" tone="muted">
+        <AppText variant="overline" tone="muted">
           {label}
         </AppText>
       ) : null}
@@ -61,17 +61,23 @@ export function ChoiceGroup<T extends string>(props: SingleProps<T> | MultiProps
               style={({ pressed }) => [
                 layout === 'list' ? styles.row : styles.chip,
                 {
-                  backgroundColor: selected ? colors.primarySoft : colors.surfaceSunken,
-                  borderColor: selected ? colors.primary : colors.inputBorder,
-                  opacity: pressed ? 0.85 : 1,
+                  backgroundColor: selected ? colors.primary : colors.surface,
+                  borderColor: colors.inputBorder,
+                  borderWidth: stroke.base,
                 },
+                selected && !pressed ? hardShadow(colors.shadow, 2) : null,
+                pressed && { transform: [{ translateX: 1 }, { translateY: 1 }] },
               ]}
             >
-              <AppText variant={layout === 'list' ? 'bodyStrong' : 'label'} color={selected ? colors.primary : colors.text}>
+              <AppText
+                variant={layout === 'list' ? 'bodyStrong' : 'label'}
+                color={selected ? colors.onPrimary : colors.text}
+                style={layout === 'list' ? null : { fontFamily: selected ? fonts.semibold : fonts.medium }}
+              >
                 {o.label}
               </AppText>
               {layout === 'list' && o.description ? (
-                <AppText variant="label" tone="muted">
+                <AppText variant="label" color={selected ? colors.onPrimary : colors.textMuted}>
                   {o.description}
                 </AppText>
               ) : null}
@@ -96,10 +102,10 @@ function Row({ layout, children }: { layout: 'chips' | 'scroll' | 'list'; childr
 
 const styles = StyleSheet.create({
   wrap: { gap: spacing.sm },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, paddingBottom: 2 },
   list: { gap: spacing.sm },
-  chip: { paddingHorizontal: spacing.lg, minHeight: 44, justifyContent: 'center', borderRadius: radius.pill, borderWidth: 1 },
-  scroll: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.lg },
+  chip: { paddingHorizontal: spacing.lg, minHeight: 44, justifyContent: 'center', borderRadius: radius.md },
+  scroll: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.lg, paddingBottom: 4, paddingRight: spacing.lg + 4 },
   scrollOuter: { marginHorizontal: -spacing.lg },
-  row: { padding: spacing.lg, borderRadius: radius.md, borderWidth: 1, gap: 2 },
+  row: { padding: spacing.lg, borderRadius: radius.md, gap: 2 },
 });

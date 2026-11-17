@@ -1,30 +1,35 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
-import { radius, spacing } from '@/theme/tokens';
+import { hardShadow, radius, spacing, stroke } from '@/theme/tokens';
 
 export interface CardProps {
   children: ReactNode;
-  /** hero: emphasised, raised surface; plain: standard; inset: sunken, for secondary info. */
+  /**
+   * hero: lime-accented, heavy shadow — one per screen for the key number.
+   * plain: outlined card with hard shadow. inset: flat, sunken, no shadow (secondary info).
+   */
   tone?: 'hero' | 'plain' | 'inset';
+  /** Optional flat fill (e.g. a macro colour) for stat tiles. */
+  fill?: string;
   style?: StyleProp<ViewStyle>;
   padded?: boolean;
 }
 
-export function Card({ children, tone = 'plain', style, padded = true }: CardProps) {
-  const { colors, name } = useTheme();
-  const bg = tone === 'hero' ? colors.surfaceRaised : tone === 'inset' ? colors.surfaceSunken : colors.surface;
+export function Card({ children, tone = 'plain', fill, style, padded = true }: CardProps) {
+  const { colors } = useTheme();
+  const bg = fill ?? (tone === 'inset' ? colors.surfaceSunken : colors.surface);
   return (
     <View
       style={[
         styles.card,
         {
           backgroundColor: bg,
-          borderColor: tone === 'inset' ? 'transparent' : colors.border,
+          borderColor: tone === 'inset' ? colors.border : colors.ink,
+          borderWidth: tone === 'inset' ? stroke.hairline : stroke.base,
           padding: padded ? (tone === 'hero' ? spacing.xxl : spacing.xl) : 0,
-          borderRadius: tone === 'hero' ? radius.xl : radius.lg,
         },
-        name === 'light' && tone !== 'inset' && styles.lightShadow,
+        tone !== 'inset' && hardShadow(tone === 'hero' ? colors.primary : colors.shadow, tone === 'hero' ? 6 : 4),
         style,
       ]}
     >
@@ -34,12 +39,5 @@ export function Card({ children, tone = 'plain', style, padded = true }: CardPro
 }
 
 const styles = StyleSheet.create({
-  card: { borderWidth: 1 },
-  lightShadow: {
-    shadowColor: '#0D1015',
-    shadowOpacity: 0.06,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
-  },
+  card: { borderRadius: radius.lg, overflow: 'visible' },
 });

@@ -138,7 +138,7 @@ export default function PhotoLog() {
       {step.s === 'consent' ? (
         <Card>
           <View style={{ gap: spacing.md }}>
-            <Icon name="shield-checkmark-outline" size={28} color={colors.primary} />
+            <Icon name="shield-checkmark-outline" size={28} color={colors.text} />
             <AppText variant="heading">Before we analyse your photos</AppText>
             <AppText tone="muted">
               To recognise food, your photo is sent securely to Google’s Gemini AI service through our server. It’s used only

@@ -1,6 +1,6 @@
 import { ActivityIndicator, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
-import { radius, spacing } from '@/theme/tokens';
+import { fonts, hardShadow, radius, spacing, stroke } from '@/theme/tokens';
 import { AppText } from './AppText';
 import { Icon, type IconName } from './Icon';
 
@@ -19,6 +19,10 @@ export interface ButtonProps {
   accessibilityHint?: string;
 }
 
+/**
+ * Neo-brutalist button: ink outline + hard shadow that "presses in" on tap.
+ * Ghost buttons are text links (underlined) with a 44px target.
+ */
 export function Button({
   label,
   onPress,
@@ -33,9 +37,11 @@ export function Button({
 }: ButtonProps) {
   const { colors } = useTheme();
   const isDisabled = disabled || loading;
-  const bg = { primary: colors.primary, secondary: colors.surfaceRaised, ghost: 'transparent', danger: colors.dangerSoft }[variant];
-  const fg = { primary: colors.onPrimary, secondary: colors.text, ghost: colors.primary, danger: colors.danger }[variant];
-  const height = { sm: 36, md: 48, lg: 56 }[size];
+  const ghost = variant === 'ghost';
+  const bg = { primary: colors.primary, secondary: colors.surface, ghost: 'transparent', danger: colors.dangerSoft }[variant];
+  const fg = { primary: colors.onPrimary, secondary: colors.text, ghost: colors.primaryText, danger: colors.danger }[variant];
+  const height = { sm: 40, md: 50, lg: 58 }[size];
+  const shadowSize = size === 'sm' ? 3 : 4;
 
   return (
     <Pressable
@@ -45,17 +51,18 @@ export function Button({
       accessibilityState={{ disabled: !!isDisabled, busy: !!loading }}
       disabled={isDisabled}
       onPress={onPress}
-      hitSlop={size === 'sm' ? { top: 4, bottom: 4 } : undefined}
+      hitSlop={size === 'sm' ? { top: 2, bottom: 2 } : undefined}
       style={({ pressed }) => [
         styles.base,
         {
           backgroundColor: bg,
-          height,
-          paddingHorizontal: size === 'sm' ? spacing.md : spacing.xl,
-          borderColor: variant === 'secondary' ? colors.border : 'transparent',
-          opacity: isDisabled ? 0.5 : pressed ? 0.85 : 1,
-          transform: [{ scale: pressed && !isDisabled ? 0.985 : 1 }],
+          minHeight: ghost ? 44 : height,
+          paddingHorizontal: ghost ? spacing.xs : size === 'sm' ? spacing.md : spacing.xl,
+          borderColor: ghost ? 'transparent' : variant === 'danger' ? colors.danger : colors.ink,
+          borderWidth: ghost ? 0 : stroke.base,
+          opacity: isDisabled ? 0.45 : 1,
         },
+        !ghost && !isDisabled && (pressed ? styles.pressed : hardShadow(variant === 'danger' ? colors.danger : colors.shadow, shadowSize)),
         fullWidth && { alignSelf: 'stretch' },
         style,
       ]}
@@ -65,7 +72,15 @@ export function Button({
       ) : (
         <View style={styles.row}>
           {icon && <Icon name={icon} size={size === 'sm' ? 16 : 20} color={fg} />}
-          <AppText variant={size === 'sm' ? 'label' : 'bodyStrong'} color={fg}>
+          <AppText
+            variant="label"
+            uppercase
+            color={fg}
+            style={[
+              { fontFamily: fonts.monoBold, letterSpacing: 0.6, fontSize: size === 'sm' ? 12 : 14 },
+              ghost && styles.underline,
+            ]}
+          >
             {label}
           </AppText>
         </View>
@@ -75,11 +90,8 @@ export function Button({
 }
 
 const styles = StyleSheet.create({
-  base: {
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-  },
+  base: { borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
+  pressed: { transform: [{ translateX: 3 }, { translateY: 3 }] },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  underline: { textDecorationLine: 'underline' },
 });

@@ -6,8 +6,9 @@ import { encodeBase64 } from "jsr:@std/encoding@^1/base64";
 import { buildUserPrompt, RESPONSE_JSON_SCHEMA, SYSTEM_PROMPT } from "./nutrition.ts";
 
 const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
-const TIMEOUT_MS = 60_000;
-const MAX_ATTEMPTS = 2;
+const PER_MODEL_TIMEOUT_MS = 25_000;
+/** Stay well under the Edge Function wall-clock limit. */
+const TOTAL_BUDGET_MS = 100_000;
 
 export type GeminiErrorCode =
   | "AI_RATE_LIMITED"
@@ -32,12 +33,18 @@ export class GeminiError extends Error {
 export interface GeminiResult {
   json: unknown;
   model: string;
+  attempts: string[];
   usage?: { promptTokenCount?: number; candidatesTokenCount?: number; totalTokenCount?: number };
 }
 
+/**
+ * Try each model in order. Move on when a model is overloaded/unavailable (503/500),
+ * rate-limited (429), times out, or doesn't exist for this key (404). Stop immediately
+ * on configuration errors (bad key) or when the image itself is rejected.
+ */
 export async function analyseFoodWithGemini(opts: {
   apiKey: string;
-  model: string;
+  models: string[];
   image: Uint8Array;
   mimeType: string;
   hint?: string | null;
@@ -57,28 +64,44 @@ export async function analyseFoodWithGemini(opts: {
     },
   });
 
-  const url = `${GEMINI_BASE}/${encodeURIComponent(opts.model)}:generateContent`;
+  const started = Date.now();
+  const attempts: string[] = [];
   let lastError: GeminiError | null = null;
 
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+  for (const model of opts.models) {
+    const remaining = TOTAL_BUDGET_MS - (Date.now() - started);
+    if (remaining < 5_000) break;
+    const url = `${GEMINI_BASE}/${encodeURIComponent(model)}:generateContent`;
     try {
-      return await callOnce(url, opts.apiKey, body, opts.model);
+      const result = await callOnce(url, opts.apiKey, body, model, Math.min(PER_MODEL_TIMEOUT_MS, remaining));
+      attempts.push(`${model}:ok`);
+      return { ...result, attempts };
     } catch (err) {
       lastError = err instanceof GeminiError
         ? err
         : new GeminiError("AI_UNAVAILABLE", "Unexpected error calling the AI service", true);
-      // Retry only transient server-side failures (not 429/quota, not bad requests).
-      const transient = lastError.code === "AI_UNAVAILABLE" || lastError.code === "AI_TIMEOUT";
-      if (!transient || attempt === MAX_ATTEMPTS) break;
-      await new Promise((r) => setTimeout(r, 800 * attempt));
+      attempts.push(`${model}:${lastError.upstreamStatus ?? lastError.code}`);
+      const tryNext = lastError.code === "AI_UNAVAILABLE" || lastError.code === "AI_TIMEOUT" ||
+        lastError.code === "AI_RATE_LIMITED" || lastError.upstreamStatus === 404;
+      if (!tryNext) break;
     }
   }
-  throw lastError!;
+  console.error(`All Gemini attempts failed: ${attempts.join(", ")}`);
+  if (lastError?.upstreamStatus === 404) {
+    throw new GeminiError("AI_CONFIG_ERROR", "The AI model is not available for this API key", false, 404);
+  }
+  throw lastError ?? new GeminiError("AI_UNAVAILABLE", "The AI service is temporarily unavailable", true);
 }
 
-async function callOnce(url: string, apiKey: string, body: string, model: string): Promise<GeminiResult> {
+async function callOnce(
+  url: string,
+  apiKey: string,
+  body: string,
+  model: string,
+  timeoutMs: number,
+): Promise<Omit<GeminiResult, "attempts">> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   let res: Response;
   try {
     res = await fetch(url, {
@@ -112,13 +135,16 @@ async function callOnce(url: string, apiKey: string, body: string, model: string
     if (res.status === 400 && /API_KEY|api key/i.test(text)) {
       throw new GeminiError("AI_CONFIG_ERROR", "The AI service is not configured correctly", false, 400);
     }
-    if (res.status === 401 || res.status === 403 || res.status === 404) {
+    if (res.status === 404) {
+      throw new GeminiError("AI_UNAVAILABLE", `Model ${model} is not available`, true, 404);
+    }
+    if (res.status === 401 || res.status === 403) {
       throw new GeminiError("AI_CONFIG_ERROR", "The AI service is not configured correctly", false, res.status);
     }
     if (res.status === 400) {
       throw new GeminiError("AI_INVALID_RESPONSE", "The AI service could not process this image", false, 400);
     }
-    throw new GeminiError("AI_UNAVAILABLE", "The AI service is temporarily unavailable", true, res.status);
+    throw new GeminiError("AI_UNAVAILABLE", "The AI service is busy right now. Please try again in a minute.", true, res.status);
   }
 
   // deno-lint-ignore no-explicit-any

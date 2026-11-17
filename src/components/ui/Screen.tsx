@@ -30,7 +30,7 @@ export function Screen({ children, scroll = true, refreshing, onRefresh, narrow,
             keyboardShouldPersistTaps="handled"
             refreshControl={
               onRefresh ? (
-                <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
+                <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} tintColor={colors.text} />
               ) : undefined
             }
           >

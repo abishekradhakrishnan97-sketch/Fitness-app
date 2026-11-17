@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
-import { radius, spacing } from '@/theme/tokens';
+import { radius, spacing, stroke } from '@/theme/tokens';
 import { AppText } from './AppText';
 import { Button } from './Button';
 import { Icon, type IconName } from './Icon';
@@ -17,15 +17,15 @@ export function Banner({
 }) {
   const { colors } = useTheme();
   const bg = { info: colors.infoSoft, warning: colors.warningSoft, danger: colors.dangerSoft }[tone];
-  const fg = { info: colors.protein, warning: colors.warning, danger: colors.danger }[tone];
+  const fg = { info: colors.text, warning: colors.warning, danger: colors.danger }[tone];
   const icon: IconName = { info: 'information-circle', warning: 'warning', danger: 'alert-circle' }[tone] as IconName;
   return (
-    <View style={[styles.banner, { backgroundColor: bg }]} accessibilityRole="alert">
+    <View style={[styles.banner, { backgroundColor: bg, borderColor: tone === 'info' ? colors.ink : fg }]} accessibilityRole="alert">
       <View style={{ marginTop: 1 }}><Icon name={icon} size={20} color={fg} /></View>
       <View style={styles.flex}>
-        {title ? <AppText variant="bodyStrong">{title}</AppText> : null}
+        {title ? <AppText variant="bodyStrong" color={colors.text}>{title}</AppText> : null}
         {typeof children === 'string' ? (
-          <AppText variant="label" tone="muted">
+          <AppText variant="label" color={colors.textMuted}>
             {children}
           </AppText>
         ) : (
@@ -40,7 +40,7 @@ export function LoadingState({ label = 'Loading…' }: { label?: string }) {
   const { colors } = useTheme();
   return (
     <View style={styles.centered} accessibilityLiveRegion="polite">
-      <ActivityIndicator color={colors.primary} size="large" />
+      <ActivityIndicator color={colors.text} size="large" />
       <AppText variant="label" tone="muted">
         {label}
       </AppText>
@@ -78,8 +78,8 @@ export function EmptyState({
   const { colors } = useTheme();
   return (
     <View style={styles.empty}>
-      <View style={[styles.emptyIcon, { backgroundColor: colors.primarySoft }]}>
-        <Icon name={icon} size={24} color={colors.primary} />
+      <View style={[styles.emptyIcon, { backgroundColor: colors.primary, borderColor: colors.ink }]}>
+        <Icon name={icon} size={24} color={colors.onPrimary} />
       </View>
       <AppText variant="bodyStrong" align="center">
         {title}
@@ -96,8 +96,8 @@ export function EmptyState({
 
 const styles = StyleSheet.create({
   flex: { flex: 1, gap: 2 },
-  banner: { flexDirection: 'row', gap: spacing.md, padding: spacing.lg, borderRadius: radius.md },
+  banner: { flexDirection: 'row', gap: spacing.md, padding: spacing.lg, borderRadius: radius.md, borderWidth: stroke.base },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, padding: spacing.xxl, minHeight: 200 },
   empty: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xxl, paddingHorizontal: spacing.lg },
-  emptyIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.xs },
+  emptyIcon: { width: 52, height: 52, borderRadius: radius.md, borderWidth: stroke.base, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.xs, transform: [{ rotate: '-4deg' }] },
 });

@@ -165,6 +165,15 @@ export type WeightLogRow = {
   weight_kg: number;
 };
 
+export type WaterLogRow = {
+  id: string;
+  user_id: string;
+  amount_ml: number;
+  logged_at: string;
+  local_date: string;
+  created_at: string;
+};
+
 export type DailyNutritionRow = {
   calories_kcal: number | null;
   carbohydrates_g: number | null;
@@ -213,6 +222,7 @@ export type Database = {
         { granted_at?: string; role: AppRole; user_id: string }
       >;
       weight_logs: Table<WeightLogRow, Opt<WeightLogRow, 'weight_kg'>>;
+      water_logs: Table<WaterLogRow, Opt<WaterLogRow, 'amount_ml'>>;
     };
     Views: {
       daily_nutrition: { Row: DailyNutritionRow; Relationships: [] };
