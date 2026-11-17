@@ -1,12 +1,11 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { MealForm } from '@/components/food/MealForm';
-import { AppText, Banner, Button, Card, LoadingState, Screen, TextField } from '@/components/ui';
+import { AppText, Banner, Button, Card, Icon, LoadingState, Screen, TextField, useToast } from '@/components/ui';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { pickImage, prepareImage, type PreparedImage } from '@/lib/image';
-import { draftFromAi, emptyItem } from '@/lib/nutrition/mealDraft';
+import { draftFromAi, draftTotals, emptyItem } from '@/lib/nutrition/mealDraft';
 import { categoriseMeal, localParts, type MealType } from '@/lib/time/mealCategory';
 import { friendlyError } from '@/services/errors';
 import {
@@ -34,6 +33,7 @@ export default function PhotoLog() {
   const { mode } = useLocalSearchParams<{ mode?: 'camera' | 'library' }>();
   const { colors } = useTheme();
   const { session } = useAuth();
+  const toast = useToast();
   const userId = session!.user.id;
   const [step, setStep] = useState<Step>({ s: 'checking' });
   const [hint, setHint] = useState('');
@@ -90,7 +90,7 @@ export default function PhotoLog() {
             {result.meal_description ? <AppText tone="muted">{result.meal_description}</AppText> : null}
             {!result.is_food ? (
               <Banner tone="warning" title="No food recognised">
-                We couldn't identify food in this photo. Enter the details below, or go back and try a clearer photo.
+                We couldn’t identify food in this photo. Enter the details below, or go back and try a clearer photo.
               </Banner>
             ) : result.needs_review ? (
               <Banner tone="warning" title="Please double-check">
@@ -118,6 +118,7 @@ export default function PhotoLog() {
             },
             v.items,
           );
+          toast(`Meal saved · ${Math.round(draftTotals(v.items).calories)} kcal added`);
           router.replace('/today');
         }}
       />
@@ -137,11 +138,11 @@ export default function PhotoLog() {
       {step.s === 'consent' ? (
         <Card>
           <View style={{ gap: spacing.md }}>
-            <Ionicons name="shield-checkmark-outline" size={28} color={colors.primary} />
+            <Icon name="shield-checkmark-outline" size={28} color={colors.primary} />
             <AppText variant="heading">Before we analyse your photos</AppText>
             <AppText tone="muted">
-              To recognise food, your photo is sent securely to Google's Gemini AI service through our server. It's used only
-              to estimate what's on your plate.
+              To recognise food, your photo is sent securely to Google’s Gemini AI service through our server. It’s used only
+              to estimate what’s on your plate.
             </AppText>
             <View style={{ gap: spacing.xs }}>
               {[

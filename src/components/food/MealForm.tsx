@@ -108,6 +108,7 @@ export function MealForm({
 
       <ChoiceGroup
         label={autoMealType ? `Meal · auto-selected ${MEAL_TYPE_LABEL[autoMealType]} from the time` : 'Meal'}
+        layout="scroll"
         options={MEAL_TYPES}
         value={v.mealType}
         onChange={(t) => setV((s) => ({ ...s, mealType: t, categoryAuto: t === autoMealType }))}

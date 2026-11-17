@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { AppText, LoadingState, Screen } from '@/components/ui';
+import { AppText, LoadingState, Screen, ToastProvider } from '@/components/ui';
 import { AuthProvider, useAuth } from '@/lib/auth/AuthProvider';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
@@ -63,7 +63,9 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemeProvider>
         <AuthProvider>
-          <RootNavigator />
+          <ToastProvider>
+            <RootNavigator />
+          </ToastProvider>
         </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>

@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import type React from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { AppText } from './AppText';
@@ -12,8 +13,8 @@ export interface Choice<T extends string> {
 interface BaseProps<T extends string> {
   label?: string;
   options: Choice<T>[];
-  /** "chips" wrap inline; "list" stacks full-width rows with descriptions. */
-  layout?: 'chips' | 'list';
+  /** "chips" wrap inline; "scroll" is one swipeable row of chips; "list" stacks full-width rows with descriptions. */
+  layout?: 'chips' | 'scroll' | 'list';
 }
 
 interface SingleProps<T extends string> extends BaseProps<T> {
@@ -47,7 +48,7 @@ export function ChoiceGroup<T extends string>(props: SingleProps<T> | MultiProps
           {label}
         </AppText>
       ) : null}
-      <View style={layout === 'chips' ? styles.chips : styles.list}>
+      <Row layout={layout}>
         {options.map((o) => {
           const selected = isSelected(o.value);
           return (
@@ -58,15 +59,15 @@ export function ChoiceGroup<T extends string>(props: SingleProps<T> | MultiProps
               accessibilityState={props.multiple ? { checked: selected } : { selected }}
               accessibilityLabel={o.description ? `${o.label}. ${o.description}` : o.label}
               style={({ pressed }) => [
-                layout === 'chips' ? styles.chip : styles.row,
+                layout === 'list' ? styles.row : styles.chip,
                 {
                   backgroundColor: selected ? colors.primarySoft : colors.surfaceSunken,
-                  borderColor: selected ? colors.primary : colors.border,
+                  borderColor: selected ? colors.primary : colors.inputBorder,
                   opacity: pressed ? 0.85 : 1,
                 },
               ]}
             >
-              <AppText variant={layout === 'chips' ? 'label' : 'bodyStrong'} color={selected ? colors.primary : colors.text}>
+              <AppText variant={layout === 'list' ? 'bodyStrong' : 'label'} color={selected ? colors.primary : colors.text}>
                 {o.label}
               </AppText>
               {layout === 'list' && o.description ? (
@@ -77,15 +78,28 @@ export function ChoiceGroup<T extends string>(props: SingleProps<T> | MultiProps
             </Pressable>
           );
         })}
-      </View>
+      </Row>
     </View>
   );
+}
+
+function Row({ layout, children }: { layout: 'chips' | 'scroll' | 'list'; children: React.ReactNode }) {
+  if (layout === 'scroll') {
+    return (
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scroll} style={styles.scrollOuter}>
+        {children}
+      </ScrollView>
+    );
+  }
+  return <View style={layout === 'chips' ? styles.chips : styles.list}>{children}</View>;
 }
 
 const styles = StyleSheet.create({
   wrap: { gap: spacing.sm },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   list: { gap: spacing.sm },
-  chip: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm + 2, borderRadius: radius.pill, borderWidth: 1 },
+  chip: { paddingHorizontal: spacing.lg, minHeight: 44, justifyContent: 'center', borderRadius: radius.pill, borderWidth: 1 },
+  scroll: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.lg },
+  scrollOuter: { marginHorizontal: -spacing.lg },
   row: { padding: spacing.lg, borderRadius: radius.md, borderWidth: 1, gap: 2 },
 });

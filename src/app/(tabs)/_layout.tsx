@@ -1,17 +1,16 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
-import type { ComponentProps } from 'react';
 import { useWindowDimensions } from 'react-native';
+import { Icon, type IconName } from '@/components/ui';
 import { useTheme } from '@/theme/ThemeProvider';
 import { layout } from '@/theme/tokens';
 
-type IconName = ComponentProps<typeof Ionicons>['name'];
 
-const icon =
-  (active: IconName, inactive: IconName) =>
-  ({ color, focused, size }: { color: unknown; focused: boolean; size: number }) => (
-    <Ionicons name={focused ? active : inactive} color={color as string} size={size} />
-  );
+function icon(active: IconName, inactive: IconName) {
+  function TabIcon({ color, focused, size }: { color: unknown; focused: boolean; size: number }) {
+    return <Icon name={focused ? active : inactive} color={color as string} size={size} />;
+  }
+  return TabIcon;
+}
 
 export const unstable_settings = { initialRouteName: 'today' };
 

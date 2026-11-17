@@ -284,8 +284,8 @@ export default function Onboarding() {
                 <Banner tone="warning" title="Goal weight is below your current weight">
                   <View style={{ gap: spacing.sm }}>
                     <AppText variant="label" tone="muted">
-                      "Build muscle" adds a calorie surplus, so it won't help you reach a lower weight. To lose weight while
-                      keeping muscle, choose "Body recomposition" or "Lose weight".
+                      “Build muscle” adds a calorie surplus, so it won’t help you reach a lower weight. To lose weight while
+                      keeping muscle, choose “Body recomposition” or “Lose weight”.
                     </AppText>
                     <Button label="Switch to Lose weight" variant="secondary" size="sm" onPress={() => setGoal('weight_loss')} />
                   </View>
@@ -293,7 +293,7 @@ export default function Onboarding() {
               ) : null}
               {weightC.value && goalWeightC.value && goal === 'weight_loss' && goalWeightC.value > weightC.value + 1 ? (
                 <Banner tone="warning" title="Goal weight is above your current weight">
-                  "Lose weight" sets a calorie deficit. If you want to gain, choose "Build muscle".
+                  “Lose weight” sets a calorie deficit. If you want to gain, choose “Build muscle”.
                 </Banner>
               ) : null}
               {assessment && assessment.level !== 'ok' ? (
@@ -391,7 +391,7 @@ export default function Onboarding() {
             </Banner>
           ) : null}
           <AppText variant="caption" tone="subtle">
-            General guidance only — not medical advice. If you're pregnant, managing a health condition, or under 18,
+            General guidance only — not medical advice. If you’re pregnant, managing a health condition, or under 18,
             check targets with a qualified professional.
           </AppText>
           {saveError ? <Banner tone="danger">{saveError}</Banner> : null}

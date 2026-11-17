@@ -39,7 +39,7 @@ export default function SignUp() {
         <AuthHeader title="Check your email" subtitle={`We sent a verification link to ${sentTo}.`} />
         <AppText tone="muted">
           Open the link on this device to verify your account, then sign in. It can take a minute to arrive — check
-          spam if you don't see it.
+          spam if you don’t see it.
         </AppText>
         <Link href="/sign-in" asChild>
           <Button label="Back to sign in" variant="secondary" size="lg" fullWidth />

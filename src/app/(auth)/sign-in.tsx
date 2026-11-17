@@ -54,7 +54,7 @@ export default function SignIn() {
         returnKeyType="go"
       />
       <View style={{ alignItems: 'flex-end', marginTop: -spacing.sm }}>
-        <Link href="/forgot-password" style={{ color: colors.primary, paddingVertical: spacing.xs }}>
+        <Link href="/forgot-password" style={{ color: colors.primary, paddingVertical: spacing.md, paddingLeft: spacing.md, minHeight: 44 }}>
           Forgot password?
         </Link>
       </View>

@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { MealForm } from '@/components/food/MealForm';
-import { LoadingState, Screen } from '@/components/ui';
+import { LoadingState, Screen, useToast } from '@/components/ui';
+import { draftTotals } from '@/lib/nutrition/mealDraft';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { takePendingItems } from '@/lib/draftStore';
 import { emptyItem, type DraftItem } from '@/lib/nutrition/mealDraft';
@@ -10,6 +11,7 @@ import { createMeal, suggestMealType } from '@/services/meals';
 
 export default function ManualEntry() {
   const { session } = useAuth();
+  const toast = useToast();
   const userId = session!.user.id;
   const [items] = useState<DraftItem[]>(() => takePendingItems() ?? [emptyItem()]);
   const [auto, setAuto] = useState<MealType | null>(null);
@@ -44,6 +46,7 @@ export default function ManualEntry() {
           },
           v.items,
         );
+        toast(`Meal saved · ${Math.round(draftTotals(v.items).calories)} kcal added`);
         router.replace('/today');
       }}
     />

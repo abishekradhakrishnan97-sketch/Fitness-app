@@ -1,7 +1,6 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { AppText, Card, ChoiceGroup, TextField } from '@/components/ui';
+import { AppText, Card, ChoiceGroup, Icon, TextField } from '@/components/ui';
 import { SERVING_UNITS, setQuantity, type DraftItem, type ItemErrors } from '@/lib/nutrition/mealDraft';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
@@ -47,15 +46,24 @@ export function ItemEditor({
             </View>
           ) : null}
           {canRemove ? (
-            <Pressable onPress={onRemove} accessibilityRole="button" accessibilityLabel={`Remove ${item.name || 'item'}`} hitSlop={10}>
-              <Ionicons name="trash-outline" size={18} color={colors.danger} />
+            <Pressable onPress={onRemove} accessibilityRole="button" accessibilityLabel={`Remove ${item.name || 'item'}`} hitSlop={13} style={{ padding: 2 }}>
+              <Icon name="trash-outline" size={18} color={colors.danger} />
             </Pressable>
           ) : null}
         </View>
       </View>
 
       <View style={styles.body}>
-        <TextField label="Food" value={item.name} onChangeText={(t) => set({ name: t })} placeholder="e.g. Masala dosa" error={errors.name} />
+        <TextField
+          label="Food"
+          value={item.name}
+          onChangeText={(t) => set({ name: t })}
+          placeholder="e.g. Masala dosa"
+          error={errors.name}
+          autoFocus={index === 0 && !item.name && item.source === 'manual'}
+          autoCapitalize="sentences"
+          returnKeyType="next"
+        />
         {uncertain && item.alternatives?.length ? (
           <View style={{ gap: spacing.xs }}>
             <AppText variant="caption" tone="warning">Not sure — could it be one of these?</AppText>
@@ -64,7 +72,7 @@ export function ItemEditor({
                 <Pressable
                   key={a}
                   onPress={() => set({ name: a })}
-                  style={[styles.alt, { borderColor: colors.border, backgroundColor: colors.surfaceSunken }]}
+                  style={[styles.alt, { borderColor: colors.inputBorder, backgroundColor: colors.surfaceSunken }]}
                   accessibilityRole="button"
                   accessibilityLabel={`Rename to ${a}`}
                 >
@@ -92,7 +100,7 @@ export function ItemEditor({
             <TextField label="Weight (optional)" value={item.grams} onChangeText={(t) => set({ grams: t })} keyboardType="decimal-pad" suffix="g" error={errors.grams} />
           </View>
         </View>
-        <ChoiceGroup label="Unit" options={UNIT_CHOICES} value={item.unit as (typeof SERVING_UNITS)[number]} onChange={(u) => set({ unit: u })} />
+        <ChoiceGroup label="Unit" layout="scroll" options={UNIT_CHOICES} value={item.unit as (typeof SERVING_UNITS)[number]} onChange={(u) => set({ unit: u })} />
         <AppText variant="caption" tone="subtle">Changing the amount scales the nutrition values below.</AppText>
 
         <View style={styles.row}>
@@ -148,5 +156,5 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: spacing.md },
   flex: { flex: 1 },
   altRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
-  alt: { paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.pill, borderWidth: 1 },
+  alt: { paddingHorizontal: spacing.md, minHeight: 36, justifyContent: 'center', borderRadius: radius.pill, borderWidth: 1 },
 });

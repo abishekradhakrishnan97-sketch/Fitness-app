@@ -1,12 +1,10 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import type { ComponentProps } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { AppText } from './AppText';
+import { Icon, type IconName } from './Icon';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
-type IconName = ComponentProps<typeof Ionicons>['name'];
 
 export interface ButtonProps {
   label: string;
@@ -47,6 +45,7 @@ export function Button({
       accessibilityState={{ disabled: !!isDisabled, busy: !!loading }}
       disabled={isDisabled}
       onPress={onPress}
+      hitSlop={size === 'sm' ? { top: 4, bottom: 4 } : undefined}
       style={({ pressed }) => [
         styles.base,
         {
@@ -65,7 +64,7 @@ export function Button({
         <ActivityIndicator color={fg} />
       ) : (
         <View style={styles.row}>
-          {icon && <Ionicons name={icon} size={size === 'sm' ? 16 : 20} color={fg} />}
+          {icon && <Icon name={icon} size={size === 'sm' ? 16 : 20} color={fg} />}
           <AppText variant={size === 'sm' ? 'label' : 'bodyStrong'} color={fg}>
             {label}
           </AppText>

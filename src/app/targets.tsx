@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppText, Banner, Button, Card, LoadingState, Screen, TextField } from '@/components/ui';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -38,23 +38,21 @@ export default function Targets() {
     });
   }, [data, profile]);
 
-  const [v, setV] = useState<Record<Field, string>>({ calories: '', protein: '', carbs: '', fat: '', fibre: '', water: '' });
+  const [edits, setEdits] = useState<Record<Field, string> | null>(null);
+  const t0 = data?.targets;
+  const v: Record<Field, string> = edits ?? {
+    calories: t0 ? String(t0.calories_kcal) : '',
+    protein: t0 ? String(t0.protein_g) : '',
+    carbs: t0 ? String(t0.carbohydrates_g) : '',
+    fat: t0 ? String(t0.fat_g) : '',
+    fibre: t0 ? String(t0.fibre_g) : '',
+    water: t0 ? String(t0.water_ml) : '',
+  };
+  const setV = (next: Record<Field, string> | ((s: Record<Field, string>) => Record<Field, string>)) =>
+    setEdits(typeof next === 'function' ? next(v) : next);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const t = data?.targets;
-    if (t) {
-      setV({
-        calories: String(t.calories_kcal),
-        protein: String(t.protein_g),
-        carbs: String(t.carbohydrates_g),
-        fat: String(t.fat_g),
-        fibre: String(t.fibre_g),
-        water: String(t.water_ml),
-      });
-    }
-  }, [data?.targets]);
 
   const checks = {
     calories: checkRange(v.calories, 800, 8000, 'Calories', true),
@@ -145,7 +143,7 @@ export default function Targets() {
       ) : null}
       {lowCalories ? (
         <Banner tone="warning" title="Very low calorie target">
-          Eating under 1,200 kcal a day is hard to meet nutrient needs on and isn't recommended without medical supervision.
+          Eating under 1,200 kcal a day is hard to meet nutrient needs on and isn’t recommended without medical supervision.
         </Banner>
       ) : null}
       {error ? <Banner tone="danger">{error}</Banner> : null}

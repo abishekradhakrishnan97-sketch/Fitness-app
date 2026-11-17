@@ -1,9 +1,8 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
-import { AppText, Banner, Button, Card, ChoiceGroup, LoadingState, Screen, TextField } from '@/components/ui';
+import { AppText, Banner, Button, Card, ChoiceGroup, Icon, LoadingState, Screen, TextField } from '@/components/ui';
 import { setPendingItems } from '@/lib/draftStore';
 import { emptyItem } from '@/lib/nutrition/mealDraft';
 import {
@@ -64,10 +63,7 @@ export default function BarcodeLookup() {
 
   useEffect(() => {
     if (mode !== 'search') return;
-    if (query.trim().length < 2) {
-      setResults(null);
-      return;
-    }
+    if (query.trim().length < 2) return;
     let live = true;
     const t = setTimeout(() => {
       setBusy(true);
@@ -184,7 +180,7 @@ export default function BarcodeLookup() {
       {notFound ? (
         <Banner tone="warning" title="Product not found">
           <View style={{ gap: spacing.sm }}>
-            <AppText variant="label" tone="muted">Barcode {notFound} isn't in Open Food Facts yet. You can add it manually from the label.</AppText>
+            <AppText variant="label" tone="muted">Barcode {notFound} isn’t in Open Food Facts yet. You can add it manually from the label.</AppText>
             <Button
               label="Add manually"
               size="sm"
@@ -227,7 +223,7 @@ export default function BarcodeLookup() {
         <>
           <TextField label="Product name or brand" value={query} onChangeText={setQuery} placeholder="e.g. Parle-G, Amul butter" returnKeyType="search" autoCorrect={false} />
           {busy ? <LoadingState label="Searching…" /> : null}
-          {results && !busy ? (
+          {results && query.trim().length >= 2 && !busy ? (
             results.length === 0 ? (
               <Card tone="inset"><AppText tone="muted" align="center">No products found. Try another name, or add it manually.</AppText></Card>
             ) : (
@@ -250,7 +246,7 @@ export default function BarcodeLookup() {
                         {p.per100g.calories !== null ? ` · ${Math.round(p.per100g.calories)} kcal/100 g` : ' · no nutrition data'}
                       </AppText>
                     </View>
-                    <Ionicons name="chevron-forward" size={16} color={colors.textSubtle} />
+                    <Icon name="chevron-forward" size={16} color={colors.textSubtle} />
                   </Pressable>
                 ))}
               </Card>

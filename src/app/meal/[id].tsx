@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { MealForm } from '@/components/food/MealForm';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
-import { AppText, Banner, Button, Card, ErrorState, LoadingState, Screen, TextField } from '@/components/ui';
+import { AppText, Banner, Button, Card, ErrorState, LoadingState, Screen, TextField, useToast } from '@/components/ui';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { draftFromRow } from '@/lib/nutrition/mealDraft';
 import { MEAL_TYPE_LABEL, type MealType } from '@/lib/time/mealCategory';
@@ -17,6 +17,7 @@ export default function MealDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors } = useTheme();
   const { session } = useAuth();
+  const toast = useToast();
   const userId = session!.user.id;
   const [dialog, confirm] = useConfirm();
   const { data: meal, loading, error, reload } = useAsync(() => getMeal(id), [id]);
@@ -61,7 +62,7 @@ export default function MealDetail() {
         onSubmit={async (v) => {
           await updateMeal(meal.id, { mealType: v.mealType, categoryAuto: v.categoryAuto && v.mealType === mealType, mealKind: v.mealKind, notes: v.notes }, v.items);
           setEditing(false);
-          setNotice('Changes saved.');
+          toast('Changes saved · totals updated');
           await reload();
         }}
       />
@@ -90,6 +91,7 @@ export default function MealDetail() {
     });
     if (ok) await run('delete', async () => {
       await deleteMeal(meal);
+      toast('Meal deleted');
       router.back();
     });
   };
@@ -175,7 +177,7 @@ export default function MealDetail() {
           loading={busy === 'dup'}
           onPress={() => run('dup', async () => {
             await duplicateMeal(meal, userId);
-            setNotice('Logged again for now. You can find it on Today.');
+            toast('Logged again for now — see Today');
           })}
           style={styles.flex}
         />
@@ -197,7 +199,7 @@ export default function MealDetail() {
                 onPress={() => run('save', async () => {
                   await createSavedMeal(userId, saveName, meal.meal_items.map((i) => draftFromRow(i)));
                   setSaveName(null);
-                  setNotice('Saved. Find it under Saved meals on the Add tab.');
+                  toast('Saved — find it under Saved meals on Add food');
                 })}
               />
             </View>

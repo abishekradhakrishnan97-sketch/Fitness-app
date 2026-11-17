@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { AppText, Banner, Button, Card, TextField } from '@/components/ui';
+import { AppText, Banner, Button, Card, TextField, useToast } from '@/components/ui';
 import { checkRange } from '@/lib/validation';
 import { logWeight } from '@/services/dashboard';
 import { friendlyError } from '@/services/errors';
@@ -18,6 +18,7 @@ export function LogWeightCard({
   previous: WeightLogRow | null;
   onSaved: () => void;
 }) {
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('');
   const [busy, setBusy] = useState(false);
@@ -33,6 +34,7 @@ export function LogWeightCard({
       await logWeight(userId, c.value);
       setValue('');
       setOpen(false);
+      toast(`Weight logged · ${c.value} kg`);
       onSaved();
     } catch (e) {
       setError(friendlyError(e));

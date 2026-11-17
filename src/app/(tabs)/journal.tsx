@@ -1,8 +1,7 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { AppText, Banner, Button, Card, ChoiceGroup, EmptyState, ErrorState, LoadingState, Screen, TextField } from '@/components/ui';
+import { AppText, Banner, Button, Card, ChoiceGroup, EmptyState, ErrorState, Icon, LoadingState, Screen, TextField } from '@/components/ui';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { addDays, localParts, MEAL_TYPE_LABEL, type MealType } from '@/lib/time/mealCategory';
 import { useAsync } from '@/lib/useAsync';
@@ -92,7 +91,7 @@ export default function Journal() {
         <AppText variant="title" accessibilityRole="header">Food journal</AppText>
         <Button label="Add" icon="add" size="sm" onPress={() => router.push('/add')} />
       </View>
-      <ChoiceGroup options={RANGES} value={range} onChange={selectRange} />
+      <ChoiceGroup layout="scroll" options={RANGES} value={range} onChange={selectRange} />
       {range === 'custom' ? (
         <Card tone="inset">
           <View style={{ gap: spacing.md }}>
@@ -173,7 +172,7 @@ export default function Journal() {
                             {m.is_estimate ? ' · estimated' : ''}
                             {m.meal_kind !== 'regular' ? ` · ${m.meal_kind}` : ''}
                           </AppText>
-                          {m.photo_path ? <Ionicons name="image-outline" size={14} color={colors.textSubtle} /> : null}
+                          {m.photo_path ? <Icon name="image-outline" size={16} color={colors.textSubtle} label="Has photo" /> : null}
                         </View>
                         <AppText variant="label" tone="muted" numberOfLines={2}>
                           {m.meal_items.map((x) => x.name).join(', ')}
@@ -183,7 +182,7 @@ export default function Journal() {
                         </AppText>
                       </View>
                       <AppText variant="bodyStrong" numeric>{Math.round(Number(m.total_calories_kcal))}</AppText>
-                      <Ionicons name="chevron-forward" size={16} color={colors.textSubtle} />
+                      <Icon name="chevron-forward" size={16} color={colors.textSubtle} />
                     </Pressable>
                   ))}
                 </Card>

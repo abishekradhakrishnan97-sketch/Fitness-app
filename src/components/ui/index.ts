@@ -1,6 +1,8 @@
 export { AppText } from './AppText';
 export { Button } from './Button';
 export { Card } from './Card';
+export { Icon, type IconName } from './Icon';
+export { ToastProvider, useToast } from './Toast';
 export { ChoiceGroup, type Choice } from './ChoiceGroup';
 export { Banner, EmptyState, ErrorState, LoadingState } from './feedback';
 export { MacroBar } from './MacroBar';

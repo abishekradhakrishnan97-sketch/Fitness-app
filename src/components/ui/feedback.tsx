@@ -1,12 +1,10 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import type { ComponentProps, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { AppText } from './AppText';
 import { Button } from './Button';
-
-type IconName = ComponentProps<typeof Ionicons>['name'];
+import { Icon, type IconName } from './Icon';
 
 export function Banner({
   tone = 'info',
@@ -23,7 +21,7 @@ export function Banner({
   const icon: IconName = { info: 'information-circle', warning: 'warning', danger: 'alert-circle' }[tone] as IconName;
   return (
     <View style={[styles.banner, { backgroundColor: bg }]} accessibilityRole="alert">
-      <Ionicons name={icon} size={20} color={fg} style={{ marginTop: 1 }} />
+      <View style={{ marginTop: 1 }}><Icon name={icon} size={20} color={fg} /></View>
       <View style={styles.flex}>
         {title ? <AppText variant="bodyStrong">{title}</AppText> : null}
         {typeof children === 'string' ? (
@@ -54,7 +52,7 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
   const { colors } = useTheme();
   return (
     <View style={styles.centered}>
-      <Ionicons name="cloud-offline-outline" size={36} color={colors.textSubtle} />
+      <Icon name="cloud-offline-outline" size={36} color={colors.textSubtle} />
       <AppText variant="bodyStrong" align="center">
         Something went wrong
       </AppText>
@@ -81,7 +79,7 @@ export function EmptyState({
   return (
     <View style={styles.empty}>
       <View style={[styles.emptyIcon, { backgroundColor: colors.primarySoft }]}>
-        <Ionicons name={icon} size={24} color={colors.primary} />
+        <Icon name={icon} size={24} color={colors.primary} />
       </View>
       <AppText variant="bodyStrong" align="center">
         {title}

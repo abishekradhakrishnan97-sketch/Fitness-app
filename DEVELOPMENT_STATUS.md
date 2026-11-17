@@ -71,6 +71,16 @@ Database E2E ✅ (`supabase/tests/phase2_food_logging_e2e.sql`, run by owner, ro
 
 Still to verify in a browser (needs Vercel env vars): UI flow Add food → save → Journal → Today → edit → delete → refresh; live Gemini photo analysis; barcode camera over HTTPS.
 
+## UI/UX audit (2026-11-17) ✅
+
+- Contrast: every text token now ≥ 4.5:1 on every surface in dark and light themes (measured); input/chip outlines ≥ 3:1 via new `inputBorder` token; smallest text 12 px.
+- Touch: small buttons, chips, icon buttons and the forgot-password link reach ≥ 44 px.
+- Screen readers: decorative icons hidden (`Icon` component); the photo marker icon labelled.
+- Safe areas: bottom CTA bars and scroll content clear the iPhone home indicator.
+- Feedback: app-wide toast (announced, reduced-motion aware) after save, edit, delete, log-again, save-template and weight log.
+- Speed: Add food CTA directly under the calorie ring; food name auto-focuses on manual entry; meal-type, unit and journal-range chips are single swipeable rows instead of 2–3 wrapped lines.
+- Code health: ESLint (eslint-config-expo) set up and clean; `useAsync` rewritten so loading is derived and stale responses can't overwrite newer data.
+
 ## Next — Phase 3/4
 
 - Weight history chart, body measurements, private progress photos; water tracking.

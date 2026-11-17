@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme/ThemeProvider';
 import { layout, spacing } from '@/theme/tokens';
 
@@ -16,6 +16,7 @@ export interface ScreenProps {
 
 export function Screen({ children, scroll = true, refreshing, onRefresh, narrow, footer }: ScreenProps) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const maxWidth = narrow ? 480 : layout.maxContentWidth;
   const content = <View style={[styles.column, { maxWidth }]}>{children}</View>;
 
@@ -25,7 +26,7 @@ export function Screen({ children, scroll = true, refreshing, onRefresh, narrow,
         {scroll ? (
           <ScrollView
             style={styles.flex}
-            contentContainerStyle={styles.scrollContent}
+            contentContainerStyle={[styles.scrollContent, !footer && { paddingBottom: spacing.huge + insets.bottom }]}
             keyboardShouldPersistTaps="handled"
             refreshControl={
               onRefresh ? (
@@ -39,7 +40,7 @@ export function Screen({ children, scroll = true, refreshing, onRefresh, narrow,
           <View style={[styles.flex, styles.scrollContent]}>{content}</View>
         )}
         {footer ? (
-          <View style={[styles.footer, { borderTopColor: colors.border, backgroundColor: colors.background }]}>
+          <View style={[styles.footer, { borderTopColor: colors.border, backgroundColor: colors.background, paddingBottom: Math.max(spacing.md, insets.bottom) }]}>
             <View style={[styles.column, { maxWidth }]}>{footer}</View>
           </View>
         ) : null}

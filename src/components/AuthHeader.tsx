@@ -1,6 +1,5 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, View } from 'react-native';
-import { AppText } from '@/components/ui';
+import { AppText, Icon } from '@/components/ui';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 
@@ -12,7 +11,7 @@ export function AuthHeader({ title, subtitle }: { title: string; subtitle?: stri
     <View style={styles.wrap}>
       <View style={styles.brand}>
         <View style={[styles.logo, { backgroundColor: colors.primary }]}>
-          <Ionicons name="flash" size={18} color={colors.onPrimary} />
+          <Icon name="flash" size={18} color={colors.onPrimary} />
         </View>
         <AppText variant="heading">{APP_NAME}</AppText>
       </View>

@@ -1,16 +1,14 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { LogWeightCard } from '@/components/LogWeightCard';
-import { AppText, Button, Card, EmptyState, ErrorState, LoadingState, MacroBar, ProgressRing, Screen } from '@/components/ui';
+import { AppText, Button, Card, EmptyState, ErrorState, Icon, LoadingState, MacroBar, ProgressRing, Screen } from '@/components/ui';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { MEAL_TYPE_LABEL, type MealType } from '@/lib/time/mealCategory';
-
-const MEAL_ORDER: MealType[] = ['breakfast', 'pre_workout', 'lunch', 'snack', 'dinner', 'other'];
 import { useAsync } from '@/lib/useAsync';
 import { getToday } from '@/services/dashboard';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
+const MEAL_ORDER: MealType[] = ['breakfast', 'pre_workout', 'lunch', 'snack', 'dinner', 'other'];
 
 function greeting(): string {
   const h = new Date().getHours();
@@ -77,6 +75,8 @@ export default function Today() {
         )}
       </Card>
 
+      <Button label="Add food" icon="add" size="lg" onPress={() => router.push('/add')} fullWidth />
+
       {targets ? (
         <Card>
           <View style={styles.sectionHead}>
@@ -93,10 +93,9 @@ export default function Today() {
       ) : null}
 
       <View style={styles.sectionHead}>
-        <AppText variant="heading">Today's meals</AppText>
+        <AppText variant="heading">Today’s meals</AppText>
         {meals.length ? <AppText variant="caption" tone="subtle">{meals.length} logged</AppText> : null}
       </View>
-      <Button label="Add food" icon="add" size="lg" onPress={() => router.push('/add')} fullWidth />
       {meals.length === 0 ? (
         <Card tone="inset">
           <EmptyState
@@ -124,7 +123,7 @@ export default function Today() {
                   style={({ pressed }) => [styles.mealRow, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border }, pressed && { backgroundColor: colors.surfaceSunken }]}
                 >
                   <View style={[styles.mealIcon, { backgroundColor: colors.primarySoft }]}>
-                    <Ionicons name={m.source === 'ai_image' ? 'camera' : 'create'} size={16} color={colors.primary} />
+                    <Icon name={m.source === 'ai_image' ? 'camera' : 'create'} size={16} color={colors.primary} />
                   </View>
                   <View style={{ flex: 1 }}>
                     <AppText variant="label" numberOfLines={1}>{m.meal_items.map((x) => x.name).join(', ')}</AppText>
@@ -135,7 +134,7 @@ export default function Today() {
                     </AppText>
                   </View>
                   <AppText variant="bodyStrong" numeric>{Math.round(Number(m.total_calories_kcal))}</AppText>
-                  <Ionicons name="chevron-forward" size={16} color={colors.textSubtle} />
+                  <Icon name="chevron-forward" size={16} color={colors.textSubtle} />
                 </Pressable>
               ))}
             </Card>

@@ -14,7 +14,7 @@ export interface TextFieldProps extends TextInputProps {
 export function TextField({ label, error, hint, suffix, style, onFocus, onBlur, ...rest }: TextFieldProps) {
   const { colors } = useTheme();
   const [focused, setFocused] = useState(false);
-  const borderColor = error ? colors.danger : focused ? colors.primary : colors.border;
+  const borderColor = error ? colors.danger : focused ? colors.primary : colors.inputBorder;
 
   return (
     <View style={styles.wrap}>

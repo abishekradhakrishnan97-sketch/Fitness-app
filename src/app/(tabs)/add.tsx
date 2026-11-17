@@ -1,10 +1,8 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useFocusEffect } from 'expo-router';
-import type { ComponentProps } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
-import { AppText, Banner, Card, EmptyState, Screen, TextField } from '@/components/ui';
+import { AppText, Banner, Card, EmptyState, Icon, Screen, TextField, type IconName } from '@/components/ui';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { setPendingItems } from '@/lib/draftStore';
 import { draftFromRow, type ItemPayload } from '@/lib/nutrition/mealDraft';
@@ -14,7 +12,6 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import type { MyFoodRow, SavedMealRow } from '@/types/database';
 
-type IconName = ComponentProps<typeof Ionicons>['name'];
 
 function ActionTile({ icon, label, hint, onPress, primary }: { icon: IconName; label: string; hint: string; onPress: () => void; primary?: boolean }) {
   const { colors } = useTheme();
@@ -33,7 +30,7 @@ function ActionTile({ icon, label, hint, onPress, primary }: { icon: IconName; l
         },
       ]}
     >
-      <Ionicons name={icon} size={24} color={primary ? colors.onPrimary : colors.primary} />
+      <Icon name={icon} size={24} color={primary ? colors.onPrimary : colors.primary} />
       <AppText variant="bodyStrong" color={primary ? colors.onPrimary : colors.text}>{label}</AppText>
       <AppText variant="caption" color={primary ? colors.onPrimary : colors.textMuted}>{hint}</AppText>
     </Pressable>
@@ -136,7 +133,7 @@ export default function AddFood() {
                   </AppText>
                 </View>
                 <AppText variant="bodyStrong" numeric>{Math.round(Number(f.calories_kcal))} kcal</AppText>
-                <Ionicons name="add-circle" size={22} color={colors.primary} />
+                <Icon name="add-circle" size={22} color={colors.primary} />
               </Pressable>
             ))}
           </Card>
@@ -158,11 +155,11 @@ export default function AddFood() {
                       {items.length} item{items.length === 1 ? '' : 's'} · {Math.round(kcal)} kcal
                     </AppText>
                   </Pressable>
-                  <Pressable onPress={() => removeSaved(m)} hitSlop={10} accessibilityRole="button" accessibilityLabel={`Delete saved meal ${m.name}`}>
-                    <Ionicons name="trash-outline" size={18} color={colors.textSubtle} />
+                  <Pressable onPress={() => removeSaved(m)} hitSlop={13} style={{ padding: 2 }} accessibilityRole="button" accessibilityLabel={`Delete saved meal ${m.name}`}>
+                    <Icon name="trash-outline" size={18} color={colors.textSubtle} />
                   </Pressable>
-                  <Pressable onPress={() => pickSaved(m)} hitSlop={10} accessibilityRole="button" accessibilityLabel={`Log ${m.name}`}>
-                    <Ionicons name="add-circle" size={22} color={colors.primary} />
+                  <Pressable onPress={() => pickSaved(m)} hitSlop={11} accessibilityRole="button" accessibilityLabel={`Log ${m.name}`}>
+                    <Icon name="add-circle" size={22} color={colors.primary} />
                   </Pressable>
                 </View>
               );
