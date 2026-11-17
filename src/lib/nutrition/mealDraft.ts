@@ -2,7 +2,7 @@
 // Pure functions only (unit-tested). Numbers are kept as strings while editing so
 // users can type freely ("1.", ""), and parsed on save.
 
-export type FoodSource = 'manual' | 'ai_image' | 'barcode' | 'saved' | 'history';
+export type FoodSource = 'manual' | 'ai_image' | 'ai_search' | 'barcode' | 'saved' | 'history';
 
 export const SERVING_UNITS = ['g', 'ml', 'piece', 'serving', 'katori', 'cup', 'bowl', 'plate', 'tbsp', 'tsp', 'slice', 'glass'] as const;
 
@@ -241,7 +241,7 @@ export function draftFromRow(
     portionDescription: row.portion_description ?? null,
     confidence: row.ai_confidence ?? null,
     aiOriginal: row.ai_original ?? undefined,
-    isEstimate: origSource === 'ai_image',
+    isEstimate: origSource === 'ai_image' || origSource === 'ai_search',
     edited: row.user_edited ?? false,
   });
 }

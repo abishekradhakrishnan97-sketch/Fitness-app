@@ -87,7 +87,7 @@ export function QuickActions() {
       <ActionTile primary icon="camera" label="Photo" onPress={() => router.push({ pathname: '/log/photo', params: { mode: 'camera' } })} />
       <ActionTile icon="barcode-outline" label="Barcode" onPress={() => router.push('/log/barcode')} />
       <ActionTile icon="search" label="Search" onPress={() => router.push('/add')} />
-      <ActionTile icon="create-outline" label="Manual" onPress={() => router.push('/log/manual')} />
+      <ActionTile icon="barbell-outline" label="Workout" onPress={() => router.push('/coach')} />
     </View>
   );
 }

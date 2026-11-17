@@ -52,6 +52,7 @@ function RootNavigator() {
           <Stack.Screen name="targets" options={{ presentation: 'modal' }} />
           <Stack.Screen name="log" />
           <Stack.Screen name="setup" />
+          <Stack.Screen name="plan" />
           <Stack.Screen name="meal/[id]" />
         </Stack.Protected>
         <Stack.Protected guard={!!session && passwordRecovery}>

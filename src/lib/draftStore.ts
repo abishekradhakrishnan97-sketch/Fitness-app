@@ -1,3 +1,4 @@
+import type { FoodSearchItem } from '@/lib/nutrition/foodSearch';
 import type { DraftItem } from '@/lib/nutrition/mealDraft';
 
 /**
@@ -14,4 +15,15 @@ export function takePendingItems(): DraftItem[] | null {
   const p = pending;
   pending = null;
   return p;
+}
+
+let pendingFood: FoodSearchItem | null = null;
+
+/** Hand a searched food to the portion screen. */
+export function setPendingFood(item: FoodSearchItem): void {
+  pendingFood = item;
+}
+
+export function peekPendingFood(): FoodSearchItem | null {
+  return pendingFood;
 }

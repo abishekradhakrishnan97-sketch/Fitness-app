@@ -146,6 +146,10 @@ export type UserPreferencesRow = {
   dashboard_metrics: string[];
   dietary_preference: string | null;
   food_restrictions: string[];
+  health_ai_consent_at: string | null;
+  health_conditions: string[];
+  medication_flags: string[];
+  medication_notes: string | null;
   preferred_cuisines: string[];
   theme: string;
   updated_at: string;

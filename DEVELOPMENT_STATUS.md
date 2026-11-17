@@ -90,6 +90,15 @@ Still to verify in a browser (needs Vercel env vars): UI flow Add food → save 
 - **Profile**: edit profile & goal after onboarding (prefilled, recalculates targets); warning when goal type contradicts goal weight.
 - Tests: 41 unit tests (new: streak, week fill, on-target, weight change).
 
+## AI food search, Coach, health profile, meal ideas (2026-11-18) ✅ built · live AI calls untested
+
+- **Food search replaces manual entry**: type 2+ letters on Add (e.g. "biri") → Edge Function `ai-coach` (`food_search`) asks Gemini for matching dishes with per-100 g nutrition and household units → portion screen (amount + any unit, live calories/macros) → one-tap log. Labelled as AI estimates. "Enter it yourself" remains as fallback. Note: values come from the model's knowledge of food composition data, not a live web lookup.
+- **Coach tab**: deterministic weekly plan (`src/lib/workout/plan.ts`) from days/week, minutes, gym/home, experience, goal and health profile; 35-exercise library; animated stick-figure demo per exercise (18 movement patterns, reduced-motion aware); goal timeline check (e.g. 20 kg in 3 months → flagged unsafe, shows realistic pace).
+- **Health profile** (`/plan/health`): conditions + medicine types stored in `user_preferences` (owner-only). Rules in `src/lib/workout/health.ts`: exercise swaps (knee/back/pregnancy), moderate-intensity cap, low-blood-sugar guidance for insulin/sulfonylureas, doctor-clearance flags. Separate explicit consent before conditions go to Gemini.
+- **Meal ideas** (`/plan/meals`): `ai-coach` `meal_ideas` — 5 ideas for a meal within remaining calories, or a full day; respects diet, allergies, cuisines and (with consent) health conditions; "Log this meal" prefills the meal form.
+- DB: migration `health_and_ai_search` applied (health columns; `ai_search` food source).
+- Tests: 49 unit tests. Not yet verified with a signed-in user: live Gemini responses for food search and meal ideas.
+
 ## Next — Phase 3/4
 
 - Weight history chart, body measurements, private progress photos; water tracking.

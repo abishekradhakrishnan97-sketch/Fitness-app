@@ -42,8 +42,9 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen name="today" options={{ title: 'Today', tabBarIcon: icon('today', 'today-outline') }} />
-      <Tabs.Screen name="add" options={{ title: 'Add food', tabBarIcon: icon('add-circle', 'add-circle-outline') }} />
+      <Tabs.Screen name="add" options={{ title: 'Add', tabBarIcon: icon('add-circle', 'add-circle-outline') }} />
       <Tabs.Screen name="journal" options={{ title: 'Journal', tabBarIcon: icon('book', 'book-outline') }} />
+      <Tabs.Screen name="coach" options={{ title: 'Coach', tabBarIcon: icon('barbell', 'barbell-outline') }} />
       <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: icon('person-circle', 'person-circle-outline') }} />
     </Tabs>
   );
